@@ -4,6 +4,7 @@
 #include <vector>
 #include <expected>
 #include <variant>
+#include <format>
 
 #include "logic/token.h"
 
@@ -31,7 +32,7 @@ public:
   constexpr ScannerError(T value) : value(value) {}
 
   constexpr auto accept(auto visitor) -> decltype(auto) {
-    return std::visit(value, visitor);
+    return std::visit(visitor, value);
   } 
 };
 
@@ -54,7 +55,7 @@ private:
   auto scanNextToken() -> std::expected<Token, ScannerError>;
   auto scanKeyword() -> std::expected<Token, ScannerError>;
 
-  auto skipWhitespaces() -> void;
+  auto skipWhitespaces(char c) -> char;
 
   auto advance() -> char;
   auto match(const char) -> bool;

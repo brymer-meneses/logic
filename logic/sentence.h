@@ -9,37 +9,55 @@ namespace logic {
 
 struct Sentence {
 
-  struct Atomic {
+  struct Variable {
+    Token identifier;
+    explicit Variable(Token value) : identifier(value) {}
+
+    friend constexpr auto operator==(const Variable& v1, const Variable& v2) -> bool = default;
+  };
+
+  struct Value {
     Token value;
-    explicit Atomic(Token value) : value(value) {}
+    explicit Value(Token value) : value(value) {}
+
+    friend constexpr auto operator==(const Value&, const Value&) -> bool = default;
   };
 
   struct Negated  {
-    Token value;
-    explicit Negated(Token value) : value(value) {}
+    std::unique_ptr<Sentence> sentence;
+    explicit Negated(Sentence value)
+        : sentence(std::make_unique<Sentence>(std::move(value))) {}
+
+    friend constexpr auto operator==(const Negated&, const Negated&) -> bool = default;
   };
 
   struct Connected {
     Token connective;
     std::unique_ptr<Sentence> left;
     std::unique_ptr<Sentence> right;
-    explicit Connected(Token connective, 
-                       Sentence left, 
-                       Sentence right) 
-      : connective(connective)
-      , left(std::make_unique<Sentence>(std::move(left)))
-      , right(std::make_unique<Sentence>(std::move(right))) {}
+    explicit Connected(Token connective, Sentence left, Sentence right)
+        : connective(connective)
+        , left(std::make_unique<Sentence>(std::move(left)))
+        , right(std::make_unique<Sentence>(std::move(right))) {}
+
+    friend constexpr auto operator==(const Connected& s1, const Connected& s2) -> bool {
+      return s1.connective == s2.connective and *s1.left == *s2.left and *s1.right == *s2.right;
+    };
   };
 
-  using ValueType = std::variant<Atomic, Connected, Negated>;
+  using ValueType = std::variant<Variable, Connected, Negated, Value>;
 
 public:
-  template <typename T>
-  requires std::is_constructible_v<T, ValueType>
-  constexpr Sentence(T value) : value(std::move(value)) { }
+  Sentence(Connected value) : value(std::move(value)) { }
+  Sentence(Negated value) : value(std::move(value)) { }
+  Sentence(Value value) : value(std::move(value)) { }
+  Sentence(Variable value) : value(std::move(value)) { }
+
+  friend constexpr auto operator==(const Sentence&, const Sentence&) -> bool = default;
 
 private:
   ValueType value;
+
 };
 
 }

@@ -11,6 +11,8 @@ struct SourceLocation {
 
   constexpr SourceLocation(size_t start, size_t end, size_t line)
     : start(start), end(end), line(line) {}
+
+  friend constexpr auto operator==(const SourceLocation&, const SourceLocation&) -> bool = default;
 };
 
 }

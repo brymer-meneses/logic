@@ -17,9 +17,8 @@ auto Scanner::scan() -> std::expected<std::vector<Token>, ScannerError> {
 }
 
 auto Scanner::scanNextToken() -> std::expected<Token, ScannerError> {
-  skipWhitespaces();
-
   auto c = advance();
+  c = skipWhitespaces(c);
 
   switch (c) {
     case '(':
@@ -41,9 +40,13 @@ auto Scanner::scanNextToken() -> std::expected<Token, ScannerError> {
 }
 
 static constexpr auto keywordLookup(std::string_view lexeme) -> std::expected<TokenType, ScannerError> {
-  if (lexeme == "TRUE" or lexeme == "FALSE") {
-    return TokenType::Boolean;
+  if (lexeme == "TRUE" ) {
+    return TokenType::True;
   }  
+  if (lexeme == "FALSE") {
+    return TokenType::False;
+  }
+
   if (lexeme == "NOT") {
     return TokenType::Not;
   }
@@ -81,15 +84,16 @@ constexpr auto Scanner::buildToken(TokenType type) -> Token {
   return Token(type, linePosition, lexeme);
 }
 
-auto Scanner::skipWhitespaces() -> void {
-  auto c = advance();
+auto Scanner::skipWhitespaces(char c) -> char {
   while (c == ' ' or c == '\t' or c == '\r' or c == '\n') {
+    mStart = mCurrent;
     if (c == '\n') {
       mLastLine = mCurrent - 1;
       mLine += 1;
     }
     c = advance();
   }
+  return c;
 }
 
 auto Scanner::advance() -> char {

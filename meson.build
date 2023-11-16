@@ -32,6 +32,8 @@ gmock_dep = gtest.get_variable('gmock_dep')
 
 test_sources = [
   'tests/testRunner.cc',
+  'tests/testScanner.cc',
+  'tests/testParser.cc',
 ]
 
 test_runner = executable(
