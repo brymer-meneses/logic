@@ -21,7 +21,21 @@ auto Parser::parseSentence() -> std::expected<Sentence, ParserError> {
     return parseGroupingSentence();
   }
 
+  if (match(TokenType::Not)) {
+    return parseNegatedSentence();
+  }
+
   return parseComplexSentence();
+}
+
+auto Parser::parseNegatedSentence() -> std::expected<Sentence, ParserError> {
+  auto sentence = parseSentence();
+
+  if (not sentence.has_value()) {
+    return std::unexpected(sentence.error());
+  }
+
+  return Sentence::Negated(std::move(*sentence));
 }
 
 auto Parser::parseConnectedSentence() -> std::expected<Sentence, ParserError> {

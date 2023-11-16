@@ -28,7 +28,20 @@ struct Sentence {
     explicit Negated(Sentence value)
         : sentence(std::make_unique<Sentence>(std::move(value))) {}
 
-    friend constexpr auto operator==(const Negated&, const Negated&) -> bool = default;
+    friend constexpr auto operator==(const Negated& n1, const Negated& n2) -> bool {
+      return *n1.sentence == *n2.sentence;
+    }
+  };
+
+  struct Grouped {
+    std::unique_ptr<Sentence> sentence;
+    explicit Grouped(Sentence value)
+        : sentence(std::make_unique<Sentence>(std::move(value))) {}
+
+    friend constexpr auto operator==(const Grouped& n1, const Grouped& n2) -> bool {
+      return *n1.sentence == *n2.sentence;
+    }
+
   };
 
   struct Connected {
@@ -45,10 +58,11 @@ struct Sentence {
     };
   };
 
-  using ValueType = std::variant<Variable, Connected, Negated, Value>;
+  using ValueType = std::variant<Variable, Connected, Negated, Value, Grouped>;
 
 public:
   Sentence(Connected value) : value(std::move(value)) { }
+  Sentence(Grouped value) : value(std::move(value)) { }
   Sentence(Negated value) : value(std::move(value)) { }
   Sentence(Value value) : value(std::move(value)) { }
   Sentence(Variable value) : value(std::move(value)) { }

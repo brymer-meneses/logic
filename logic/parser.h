@@ -53,6 +53,7 @@ private:
   auto parseComplexSentence() -> std::expected<Sentence, ParserError>;
   auto parseConnectedSentence() -> std::expected<Sentence, ParserError>;
   auto parseGroupingSentence() -> std::expected<Sentence, ParserError>;
+  auto parseNegatedSentence() -> std::expected<Sentence, ParserError>;
 
   auto parseAtomicSentence() -> std::expected<Sentence, ParserError>;
 

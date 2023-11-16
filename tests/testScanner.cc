@@ -13,7 +13,7 @@ using namespace logic;
 
 TEST(Scanner, TestKeywords) {
 
-  auto scanner = Scanner("TRUE FALSE NOT AND OR IMPLIES EQUIVALENT P Q S");
+  auto scanner = Scanner("TRUE FALSE NOT AND OR IMPLIES EQUIVALENT P Q S ( )");
   auto tokens = scanner.scan();
 
   if (not tokens.has_value()) {
@@ -38,6 +38,8 @@ TEST(Scanner, TestKeywords) {
     TokenType::Variable,
     TokenType::Variable,
     TokenType::Variable,
+    TokenType::LeftParen,
+    TokenType::RightParen,
   };
 
   for (const auto& [token, expectedType] : std::views::zip(*tokens, expectedTokens)) {

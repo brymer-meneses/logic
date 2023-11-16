@@ -52,3 +52,20 @@ TEST(Parser, TestConnectedSentence) {
 
   verifySentence("P IMPLIES Q", std::move(sentence));
 }
+
+TEST(Parser, TestNegatedSentence) {
+  auto sentence = Sentence::Negated(
+    Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P"))
+  );
+
+  verifySentence("NOT P", std::move(sentence));
+}
+
+TEST(Parser, TestComplexSentence) {
+
+  auto sentence = Sentence::Grouped(
+      Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P"))
+  );
+
+  verifySentence("( P )", std::move(sentence));
+}
