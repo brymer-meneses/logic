@@ -44,15 +44,6 @@ TEST(Parser, TestVariableSentence) {
   verifySentence("P", sentence);
 }
 
-TEST(Parser, TestConnectedSentence) {
-  auto sentence = Sentence::Connected(
-    Token(TokenType::Implies, DUMMY_LOCATION, "IMPLIES"), 
-    Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P")),
-    Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "Q")));
-
-  verifySentence("P IMPLIES Q", std::move(sentence));
-}
-
 TEST(Parser, TestNegatedSentence) {
   auto sentence = Sentence::Negated(
     Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P"))
@@ -61,11 +52,48 @@ TEST(Parser, TestNegatedSentence) {
   verifySentence("NOT P", std::move(sentence));
 }
 
-TEST(Parser, TestComplexSentence) {
+TEST(Parser, TestCompoundSentence) {
+  auto sentence = Sentence::Compound(
+    Token(TokenType::Implies, DUMMY_LOCATION, "IMPLIES"), 
+    Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P")),
+    Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "Q")));
 
-  auto sentence = Sentence::Grouped(
-      Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P"))
+  verifySentence("P IMPLIES Q", std::move(sentence));
+}
+
+TEST(Parser, TestComplexSentence) {
+  auto s1 = Sentence::Negated(
+      Sentence::Grouped(
+        Sentence::Compound(
+          Token(TokenType::Implies, DUMMY_LOCATION, "IMPLIES"), 
+          Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P")),
+          Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "Q"))
+        )
+      )
+  );
+  
+  verifySentence("NOT ( P IMPLIES Q )", std::move(s1));
+
+  auto s2 = Sentence::Compound(
+    Token(TokenType::Implies, DUMMY_LOCATION, "IMPLIES"), 
+    Sentence::Negated(Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P"))),
+    Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "Q"))
   );
 
-  verifySentence("( P )", std::move(sentence));
+  verifySentence("NOT P IMPLIES Q", std::move(s2));
+}
+
+TEST(Parser, TestOperatorPrecedence) {
+  auto sentence = Sentence::Compound(
+    Token(TokenType::Or, DUMMY_LOCATION, "OR"), 
+    Sentence::Compound(
+      Token(TokenType::And, DUMMY_LOCATION, "AND"), 
+      Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P")),
+      Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "Q"))
+    ),
+    Sentence::Variable(
+      Token(TokenType::Variable, DUMMY_LOCATION, "P")
+    )
+  );
+  verifySentence("P AND Q OR P", std::move(sentence));
 }

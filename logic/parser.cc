@@ -17,19 +17,83 @@ auto Parser::parse() -> std::expected<std::vector<Sentence>, ParserError> {
 }
 
 auto Parser::parseSentence() -> std::expected<Sentence, ParserError> {
-  if (match(TokenType::LeftParen)) {
-    return parseGroupingSentence();
+  return parseCompoundSentence();
+}
+
+auto Parser::parseGroupedSentence() -> std::expected<Sentence, ParserError> {
+  auto sentence = parseSentence();
+
+  if (not sentence.has_value()) {
+    return std::unexpected(sentence.error());
   }
 
+  if (not match(TokenType::RightParen)) {
+    return std::unexpected(ParserError::ExpectedToken(TokenType::RightParen, peek()));
+  }
+
+  return Sentence::Grouped(std::move(*sentence));
+}
+
+auto Parser::parseCompoundSentence() -> std::expected<Sentence, ParserError> {
+  auto lhs = parsePrimary();
+  if (not lhs) {
+    return std::unexpected(lhs.error());
+  }
+
+  return parseBinaryRHS(0, std::move(*lhs));
+}
+
+auto Parser::parsePrimary() -> std::expected<Sentence, ParserError> {
+  if (match(TokenType::LeftParen)) {
+    return parseGroupedSentence();
+  }
   if (match(TokenType::Not)) {
     return parseNegatedSentence();
   }
 
-  return parseComplexSentence();
+  return parseAtomicSentence();
+}
+
+auto Parser::parseBinaryRHS(int prevPrec, Sentence lhs) -> std::expected<Sentence, ParserError> {
+  constexpr static auto getTokenPrecedence = [](TokenType type) -> int {
+    switch (type) {
+      case TokenType::Implies:
+        return 10;
+      case TokenType::Or:
+        return 20;
+      case TokenType::And:
+        return 30;
+      default:
+        return -1;
+    }
+  };
+
+  while (true) {
+    auto tokenPrec = getTokenPrecedence(peek().type);
+    if (tokenPrec < prevPrec) {
+      return lhs;
+    }
+
+    auto binOp = advance();
+    auto rhs = parsePrimary();
+    if (not rhs.has_value()) {
+      return std::unexpected(rhs.error());
+    }
+
+    auto nextPrec = getTokenPrecedence(peek().type);
+    if (tokenPrec < nextPrec) {
+      rhs = parseBinaryRHS(tokenPrec + 1, std::move(*rhs));
+      if (not rhs) {
+        return rhs;
+      }
+    }
+
+    lhs = Sentence::Compound(binOp, std::move(lhs), std::move(*rhs));
+  }
 }
 
 auto Parser::parseNegatedSentence() -> std::expected<Sentence, ParserError> {
-  auto sentence = parseSentence();
+  auto sentence = parsePrimary();
 
   if (not sentence.has_value()) {
     return std::unexpected(sentence.error());
@@ -38,48 +102,19 @@ auto Parser::parseNegatedSentence() -> std::expected<Sentence, ParserError> {
   return Sentence::Negated(std::move(*sentence));
 }
 
-auto Parser::parseConnectedSentence() -> std::expected<Sentence, ParserError> {
-  auto sentence = parseAtomicSentence();
-
-  if (not sentence) {
-    return std::unexpected(sentence.error());
-  }
-
-  while (match({TokenType::Implies, TokenType::And, TokenType::Or, TokenType::Equivalent})) {
-    auto op = peekPrevious();
-    auto right = parseAtomicSentence();
-    sentence = Sentence::Connected(op, std::move(*sentence), std::move(*right));
-  }
-
-  return sentence;
-}
-
-auto Parser::parseGroupingSentence() -> std::expected<Sentence, ParserError> {
-  auto sentence = parseSentence();
-
-  if (not match(TokenType::RightParen)) {
-    return std::unexpected(ParserError::ExpectedToken(TokenType::RightParen, peek()));
-  }
-
-  return sentence;
-}
-
-auto Parser::parseComplexSentence() -> std::expected<Sentence, ParserError> {
-  return parseConnectedSentence();
-}
-
-
 auto Parser::parseAtomicSentence() -> std::expected<Sentence, ParserError> {
+
+  if (match({TokenType::True, TokenType::False})) {
+    return Sentence::Value(peekPrevious());
+  }
+
   if (match(TokenType::Variable)) {
     return Sentence::Variable(peekPrevious());
   }
 
-  if (match(TokenType::True) or match(TokenType::False)) {
-    return Sentence::Value(peekPrevious());
-  }
-
-  __builtin_unreachable();
+  RAISE_INTERNAL_ERROR("Unreachable");
 }
+
 
 constexpr auto Parser::isAtEnd() const -> bool {
   return mCurrent >= mTokens.size() or mTokens.at(mCurrent).type == TokenType::EndOfFile;
@@ -118,4 +153,12 @@ constexpr auto Parser::match(std::initializer_list<TokenType> types) -> bool {
   }
 
   return false;
+}
+
+constexpr auto Parser::advance() -> const Token& {
+  if (isAtEnd()) {
+    return mTokens.back();
+  }
+
+  return mTokens[mCurrent++];
 }

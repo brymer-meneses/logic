@@ -50,12 +50,16 @@ public:
 private:
   auto parseSentence() -> std::expected<Sentence, ParserError>;
 
-  auto parseComplexSentence() -> std::expected<Sentence, ParserError>;
-  auto parseConnectedSentence() -> std::expected<Sentence, ParserError>;
-  auto parseGroupingSentence() -> std::expected<Sentence, ParserError>;
-  auto parseNegatedSentence() -> std::expected<Sentence, ParserError>;
+  auto parseGroupedSentence() -> std::expected<Sentence, ParserError>;
 
+  auto parseCompoundSentence() -> std::expected<Sentence, ParserError>;
+  auto parseNegatedSentence() -> std::expected<Sentence, ParserError>;
   auto parseAtomicSentence() -> std::expected<Sentence, ParserError>;
+
+  auto parseBinaryRHS(int, Sentence) -> std::expected<Sentence, ParserError>;
+  auto parsePrimary() -> std::expected<Sentence, ParserError>;
+
+  constexpr auto advance() -> const Token&;
 
   constexpr auto match(TokenType) -> bool;
   constexpr auto match(std::initializer_list<TokenType> tokens) -> bool;

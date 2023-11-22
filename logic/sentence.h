@@ -44,24 +44,24 @@ struct Sentence {
 
   };
 
-  struct Connected {
+  struct Compound {
     Token connective;
     std::unique_ptr<Sentence> left;
     std::unique_ptr<Sentence> right;
-    explicit Connected(Token connective, Sentence left, Sentence right)
+    explicit Compound(Token connective, Sentence left, Sentence right)
         : connective(connective)
         , left(std::make_unique<Sentence>(std::move(left)))
         , right(std::make_unique<Sentence>(std::move(right))) {}
 
-    friend constexpr auto operator==(const Connected& s1, const Connected& s2) -> bool {
+    friend constexpr auto operator==(const Compound& s1, const Compound& s2) -> bool {
       return s1.connective == s2.connective and *s1.left == *s2.left and *s1.right == *s2.right;
     };
   };
 
-  using ValueType = std::variant<Variable, Connected, Negated, Value, Grouped>;
+  using ValueType = std::variant<Variable, Compound, Negated, Value, Grouped>;
 
 public:
-  Sentence(Connected value) : value(std::move(value)) { }
+  Sentence(Compound value) : value(std::move(value)) { }
   Sentence(Grouped value) : value(std::move(value)) { }
   Sentence(Negated value) : value(std::move(value)) { }
   Sentence(Value value) : value(std::move(value)) { }
