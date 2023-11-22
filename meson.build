@@ -4,13 +4,15 @@ sources = [
   'logic/scanner.cc',
   'logic/parser.cc',
   'logic/evaluator.cc',
+  'logic/value.cc',
 ]
 
 cpp_args = [
   '-std=c++2b',
   '-Wpedantic',
   '-fno-exceptions',
-  '-fno-rtti'
+  '-fno-rtti',
+  '-Wno-gnu-statement-expression'
 ]
 
 liblogic = static_library(
