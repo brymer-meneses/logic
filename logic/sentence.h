@@ -67,6 +67,10 @@ public:
   Sentence(Value value) : value(std::move(value)) { }
   Sentence(Variable value) : value(std::move(value)) { }
 
+  constexpr auto accept(auto visitor) const -> decltype(auto) {
+    return std::visit(visitor, value);
+  } 
+
   friend constexpr auto operator==(const Sentence&, const Sentence&) -> bool = default;
 
 private:

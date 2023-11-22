@@ -2,7 +2,8 @@ project('logic', 'cpp', version: '0.0.1')
 
 sources = [
   'logic/scanner.cc',
-  'logic/parser.cc'
+  'logic/parser.cc',
+  'logic/evaluator.cc',
 ]
 
 cpp_args = [
