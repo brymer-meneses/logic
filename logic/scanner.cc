@@ -1,4 +1,5 @@
-#include "scanner.h"
+#include "logic/scanner.h"
+#include "logic/utils.h"
 
 using namespace logic;
 
@@ -70,11 +71,8 @@ auto Scanner::scanKeyword() -> std::expected<Token, ScannerError> {
     advance();
   }
   auto lexeme = mSource.substr(mStart, mCurrent - mStart);
-  auto type = keywordLookup(lexeme);
-  if (not type) {
-    return std::unexpected(type.error());
-  }
-  return buildToken(*type);
+  auto type = TRY(keywordLookup(lexeme));
+  return buildToken(type);
 }
 
 constexpr auto Scanner::buildToken(TokenType type) -> Token {

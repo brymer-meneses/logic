@@ -46,12 +46,14 @@ auto Parser::parsePrimary() -> std::expected<Sentence, ParserError> {
 auto Parser::parseBinaryRHS(int prevPrec, Sentence lhs) -> std::expected<Sentence, ParserError> {
   constexpr static auto getTokenPrecedence = [](TokenType type) -> int {
     switch (type) {
-      case TokenType::Implies:
+      case TokenType::Equivalent:
         return 10;
-      case TokenType::Or:
+      case TokenType::Implies:
         return 20;
-      case TokenType::And:
+      case TokenType::Or:
         return 30;
+      case TokenType::And:
+        return 40;
       default:
         return -1;
     }

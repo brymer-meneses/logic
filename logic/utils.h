@@ -24,3 +24,14 @@ overloaded(Ts...) -> overloaded<Ts...>;
     };                                                                         \
     std::move(*temp);                                                          \
   });
+
+#define ASSERT(expr, ...)                                                      \
+  {                                                                            \
+    if (not(expr)) [[unlikely]] {                                              \
+      const auto location = std::source_location::current();                   \
+      std::println(stderr, "[{}:{}]: {}", location.file_name(),                \
+                   location.line(), location.function_name());                 \
+      std::println(stderr, "ASSERTION ERROR: " __VA_ARGS__);                   \
+      exit(1);                                                                 \
+    }                                                                          \
+  }

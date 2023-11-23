@@ -5,36 +5,47 @@
 #include "logic/value.h"
 
 #include <string_view>
+#include <vector>
 #include <cstddef>
-#include <optional>
 #include <expected>
 
 namespace logic {
 
 class EvaluatorError {
 
-};
+public:
+  struct InvalidVariableName {
+    Token variable;
 
-class Environment {
-  std::optional<Value> P;
-  std::optional<Value> Q;
-  std::optional<Value> S;
+    explicit InvalidVariableName(Token variable) : variable(variable) {}
+  };
 
-  uint8_t usedVariables = 0;
+private:
+  using ValueType = std::variant<InvalidVariableName>;
+  ValueType value;
+
+public:
+  template <typename T>
+  requires std::is_constructible_v<ValueType, T>
+  constexpr EvaluatorError(T value) : value(value) {}
+
+  constexpr auto accept(auto visitor) -> decltype(auto) {
+    return std::visit(visitor, value);
+  } 
 };
 
 class Evaluator {
-
 private:
-  Environment environment;
+  auto countUniqueVariables(const Sentence&) const -> size_t;
 
 public:
-  auto evaluate(std::string_view) -> void;
-  auto evaluateSentence(const Sentence&) -> std::expected<Value, EvaluatorError>;
+  auto evaluate(const Sentence&) const -> std::expected<Value, EvaluatorError>;
 
-private:
-  auto defineVariable(Token) -> void;
-
+  auto negation(Value) const -> Value;
+  auto conjunction(Value, Value) const -> Value;
+  auto disjunction(Value, Value) const -> Value;
+  auto implication(Value, Value) const -> Value;
+  auto bijection(Value, Value) const -> Value;
 };
 
 }
