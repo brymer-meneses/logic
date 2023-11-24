@@ -1,7 +1,7 @@
 
 #include "logic/evaluator.h"
+#include "logic/environment.h"
 #include "logic/utils.h"
-
 #include "logic/scanner.h"
 #include "logic/parser.h"
 
@@ -10,37 +10,35 @@
 
 using namespace logic;
 
-using Array = std::array<bool, 4>;
-
-#define DEFINE_CONNECTIVE_EVALUATION(name, operation)                     \
-  auto name(Value left, Value right) const -> Value {                     \
-    return std::visit(overloaded {                                        \
-      [](const bool v1, const bool v2) -> Value {                         \
-        return operation(v1, v2);                                         \
-      },                                                                  \
-      [](const Array& v1, const bool v2) -> Value {                       \
-        Array result;                                                     \
-        for (int i=0; i<v1.size(); i++) {                                 \
-          result[i] = operation(v1[i], v2);                               \
-        }                                                                 \
-        return result;                                                    \
-      },                                                                  \
-      [](const bool v1, const Array& v2) -> Value {                       \
-        Array result;                                                     \
-        for (int i=0; i<v2.size(); i++) {                                 \
-          result[i] = operation(v2[i], v1);                               \
-        }                                                                 \
-        return result;                                                    \
-      },                                                                  \
-      [](const Array& v1, const Array& v2) -> Value {                     \
-        Array result;                                                     \
-        for (int i=0; i <v1.size(); i++) {                                \
-          result[i] = operation(v1[i], v2[i]);                            \
-        }                                                                 \
-        return result;                                                    \
-      }                                                                   \
-    }, left.data, right.data);                                            \
-  }                                                                       \
+#define DEFINE_CONNECTIVE_EVALUATION(name, operation)                                 \
+  auto name(Value left, Value right) const -> Value {                                 \
+    return std::visit(overloaded {                                                    \
+      [](const bool v1, const bool v2) -> Value {                                     \
+        return operation(v1, v2);                                                     \
+      },                                                                              \
+      [](const std::vector<bool>& v1, const bool v2) -> Value {                       \
+        std::vector<bool> result;                                                     \
+        for (int i=0; i<v1.size(); i++) {                                             \
+          result[i] = operation(v1[i], v2);                                           \
+        }                                                                             \
+        return result;                                                                \
+      },                                                                              \
+      [](const bool v1, const std::vector<bool>& v2) -> Value {                       \
+        std::vector<bool> result;                                                     \
+        for (int i=0; i<v2.size(); i++) {                                             \
+          result[i] = operation(v2[i], v1);                                           \
+        }                                                                             \
+        return result;                                                                \
+      },                                                                              \
+      [](const std::vector<bool>& v1, const std::vector<bool>& v2) -> Value {         \
+        std::vector<bool> result;                                                     \
+        for (int i=0; i <v1.size(); i++) {                                            \
+          result[i] = operation(v1[i], v2[i]);                                        \
+        }                                                                             \
+        return result;                                                                \
+      }                                                                               \
+    }, left.data, right.data);                                                        \
+  }                                                                                   \
 
 static constexpr auto _implication(const bool p, const bool q) -> bool {
   return not p or q;
@@ -65,22 +63,13 @@ DEFINE_CONNECTIVE_EVALUATION(Evaluator::conjunction, _conjunction);
 
 auto Evaluator::evaluate(const Sentence& sentence) const -> std::expected<Value, EvaluatorError> {
 
-  const auto numVariables = countUniqueVariables(sentence);
-
-  // TODO:
-  // if (numVariables > 2) {
-  // }
+  auto environment = Environment(countUniqueVariables(sentence));
 
   return sentence.accept(
     overloaded {
-      [&numVariables](const Sentence::Variable& s) -> std::expected<Value, EvaluatorError> {
-        if (s.identifier.lexeme == "P") {
-          return numVariables == 1 ? Value({true, false}) : Value({true, true, false, false});
-        } else if (s.identifier.lexeme == "Q") {
-          return numVariables == 1 ? Value({true, false}) : Value({false, false, true, true});
-        }
-
-        return std::unexpected(EvaluatorError::InvalidVariableName(s.identifier));
+      [&environment](const Sentence::Variable& s) -> std::expected<Value, EvaluatorError> {
+        environment.defineVariable(s.identifier.lexeme);
+        return environment.readVariable(s.identifier.lexeme);
       },
       [](const Sentence::Value& s) -> std::expected<Value, EvaluatorError> {
         if (s.value.type == TokenType::True) {
@@ -122,8 +111,8 @@ auto Evaluator::negation(Value v) const -> Value {
     [](bool value) -> Value {
       return not value;
     },
-    [](Array value) -> Value {
-      Array newValue;
+    [](std::vector<bool> value) -> Value {
+      std::vector<bool> newValue;
       for (int i=0; i<value.size(); i++) {
         newValue[i] = not value[i];
       }

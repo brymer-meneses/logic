@@ -4,6 +4,7 @@ sources = [
   'logic/scanner.cc',
   'logic/parser.cc',
   'logic/evaluator.cc',
+  'logic/environment.cc',
 ]
 
 cpp_args = [
@@ -37,6 +38,7 @@ test_sources = [
   'tests/testScanner.cc',
   'tests/testParser.cc',
   'tests/testEvaluator.cc',
+  'tests/testEnvironment.cc',
 ]
 
 test_runner = executable(

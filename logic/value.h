@@ -2,13 +2,14 @@
 
 #include <array>
 #include <variant>
+#include <vector>
 
 namespace logic {
 
 class Value {
 
 private:
-  std::variant<bool, std::array<bool, 4>> data;
+  std::variant<bool, std::vector<bool>> data;
 
 public:
   constexpr auto accept(auto visitor) -> decltype(auto) {
@@ -16,7 +17,7 @@ public:
   }
 
   constexpr Value(bool value) : data(value) {}
-  constexpr Value(std::array<bool, 4> value) : data(value) {}
+  constexpr Value(std::vector<bool> value) : data(value) {}
 
   friend constexpr auto operator==(const Value&, const Value&) -> bool = default;
   friend class Evaluator;
