@@ -1,10 +1,19 @@
+#include <iostream>
+#include <format>
+
 #include <gtest/gtest.h>
 
 #include "logic/evaluator.h"
 #include "logic/scanner.h"
 #include "logic/parser.h"
+#include "logic/value.h"
+#include "logic/utils.h"
 
 using namespace logic;
+
+constexpr auto logic::operator<<(std::ostream& stream, const Value& value) -> std::ostream& {
+  return stream << std::format("{})", value.data);
+}
 
 auto verifyResult(std::string_view source, Value expectedValue) {
 
@@ -36,59 +45,63 @@ auto verifyResult(std::string_view source, Value expectedValue) {
   auto evaluator = Evaluator();
   auto value = evaluator.evaluate(sentences->at(0));
 
-  EXPECT_EQ(value, expectedValue);
+  if (not value.has_value()) {
+    FAIL();
+  }
+
+  EXPECT_EQ(*value, expectedValue);
 }
 
 TEST(Evaluator, TestScalar) {
-  verifyResult("TRUE", Value(true));
-  verifyResult("FALSE", Value(false));
+  verifyResult("TRUE", true);
+  verifyResult("FALSE", false);
 
-  verifyResult("NOT TRUE", Value(false));
-  verifyResult("NOT FALSE", Value(true));
+  verifyResult("NOT TRUE", false);
+  verifyResult("NOT FALSE", true);
 
-  verifyResult("NOT NOT TRUE", Value(true));
-  verifyResult("NOT NOT FALSE", Value(false));
+  verifyResult("NOT NOT TRUE", true);
+  verifyResult("NOT NOT FALSE", false);
 
-  verifyResult("TRUE EQUIVALENT TRUE", Value(true));
-  verifyResult("TRUE EQUIVALENT FALSE", Value(false));
+  verifyResult("TRUE EQUIVALENT TRUE", true);
+  verifyResult("TRUE EQUIVALENT FALSE", false);
+  verifyResult("FALSE EQUIVALENT FALSE", true);
 
-  verifyResult("TRUE OR TRUE", Value(true));
-  verifyResult("TRUE OR FALSE", Value(true));
+  verifyResult("TRUE OR TRUE", true);
+  verifyResult("TRUE OR FALSE", true);
 
-  verifyResult("TRUE AND TRUE", Value(true));
-  verifyResult("TRUE AND FALSE", Value(false));
+  verifyResult("TRUE AND TRUE", true);
+  verifyResult("TRUE AND FALSE", false);
 
-  verifyResult("TRUE IMPLIES TRUE", Value(true));
-  verifyResult("TRUE IMPLIES FALSE", Value(false));
+  verifyResult("TRUE IMPLIES TRUE", true);
+  verifyResult("TRUE IMPLIES FALSE", false);
 }
 
 TEST(Evaluator, TestSingleVariable) {
-  verifyResult("P", Value({true, false}));
-  // verifyResult("NOT P", Value({false, true}));
+  verifyResult("P", {true, false});
+  verifyResult("NOT P", {false, true});
 
-  //
-  // verifyResult("P EQUIVALENT TRUE", Value({true, true, false, false}));
-  // verifyResult("P EQUIVALENT FALSE", Value({false, false, true, true}));
-  //
-  // verifyResult("P OR TRUE", Value({true, true, true, true}));
-  // verifyResult("P OR FALSE", Value({true, true, false, false}));
-  //
-  // verifyResult("P AND TRUE", Value({true, true, false, false}));
-  // verifyResult("P AND FALSE", Value({false, false, false, false}));
-  //
-  // verifyResult("P IMPLIES TRUE", Value({true, true, true, true}));
-  // verifyResult("P IMPLIES FALSE", Value({false, false, true, true}));
+  verifyResult("P EQUIVALENT TRUE", {true, false});
+  verifyResult("P EQUIVALENT FALSE", {false, true});
+  
+  verifyResult("P OR TRUE", {true, true});
+  verifyResult("P OR FALSE", {true, false});
+  
+  verifyResult("P AND TRUE", {true, false});
+  verifyResult("P AND FALSE", {false, false});
+  
+  verifyResult("P IMPLIES TRUE", {true, true});
+  verifyResult("P IMPLIES FALSE", {false, true});
 }
 
-// TEST(Evaluator, TestMultipleVariables) {
-//   verifyResult("P", Value({true, true, false, false}));
-//   verifyResult("NOT P", Value({false, false, true, true}));
-//
-//   verifyResult("Q", Value({true, false, true, false}));
-//   verifyResult("NOT Q", Value({false, true, false, true}));
-//
-//   verifyResult("P EQUIVALENT Q", Value({true, false, false, true}));
-//   verifyResult("P OR Q", Value({true, true, true, false}));
-//   verifyResult("P AND Q", Value({true, false, false, false}));
-//   verifyResult("P IMPLIES Q", Value({true, false, true, true}));
-// }
+TEST(Evaluator, TestMultipleVariables) {
+  verifyResult("P EQUIVALENT Q", {true, false, false, true});
+  verifyResult("P OR Q", {true, true, true, false});
+  verifyResult("P AND Q", {true, false, false, false});
+  verifyResult("P IMPLIES Q", {true, false, true, true});
+
+  verifyResult("(P EQUIVALENT Q) EQUIVALENT S", {true, false, false, true, false, true, true, false});
+  verifyResult("(P OR Q) OR S", {true, true, true, true, true, true, true, false});
+  verifyResult("(P AND Q) AND S", {true, false, false, false, false, false, false, false});
+  verifyResult("(P IMPLIES Q) IMPLIES S", {true, false, true, true, true, false, true ,false});
+}
+

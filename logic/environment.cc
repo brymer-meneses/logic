@@ -4,31 +4,35 @@
 
 using namespace logic;
 
-Environment::Environment(uint8_t numVariables) : mNumVariables(numVariables) {
-  auto maxNum = (1 << mNumVariables) - 1;
-  for (auto i=maxNum; i >= 0; i--) {
+auto Environment::define(std::string_view variableName) -> void {
+  if (mVariables.contains(variableName)) return;
+
+  mVariables.insert(variableName);
+
+  mData.clear();
+  mData.reserve(1 << mVariables.size());
+
+  for (auto i = (1 << mVariables.size()) - 1; i >= 0; i--) {
     mData.push_back(i);
   }
-
-  ASSERT(mData.size() == 1 << mNumVariables);
-};
-
-auto Environment::defineVariable(std::string_view variableName) -> void {
-  static uint8_t currentIndex = mNumVariables-1;
-  mOffsets[variableName] = currentIndex--;
 }
 
-auto Environment::readVariable(std::string_view variableName) -> std::vector<bool> {
-  ASSERT(mOffsets.contains(variableName),
+auto Environment::read(std::string_view variableName) const -> std::vector<bool> {
+  ASSERT(mVariables.contains(variableName),
          "INTERNAL ERROR: Tried to read variable `{}` is not defined",
          variableName);
 
   auto result = std::vector<bool> {};
-  auto offset = mOffsets[variableName];
+
+  auto offset = mVariables.size() - 1;
+  for (const auto& var : mVariables) {
+    if (variableName == var) { break; }
+    offset -= 1;
+  }
+
   for (const auto& data : mData) {
     result.push_back(data.test(offset));
   }
 
-  ASSERT(result.size() == 1 << mNumVariables);
   return result;
 }

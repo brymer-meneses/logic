@@ -3,6 +3,7 @@
 #include "logic/sentence.h"
 #include "logic/utils.h"
 #include "logic/value.h"
+#include "logic/environment.h"
 
 #include <string_view>
 #include <vector>
@@ -35,11 +36,14 @@ public:
 };
 
 class Evaluator {
+  Environment mEnvironment;
+
 private:
-  auto countUniqueVariables(const Sentence&) const -> size_t;
+  auto initializeEnvironment(const Sentence&) -> void;
+  auto internalEvaluate(const Sentence&) const -> std::expected<Value, EvaluatorError>;
 
 public:
-  auto evaluate(const Sentence&) const -> std::expected<Value, EvaluatorError>;
+  auto evaluate(const Sentence&) -> std::expected<Value, EvaluatorError>;
 
   auto negation(Value) const -> Value;
   auto conjunction(Value, Value) const -> Value;

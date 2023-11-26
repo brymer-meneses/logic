@@ -1,9 +1,10 @@
 #pragma once
 
 #include <cstddef>
-#include <vector>
 #include <bitset>
 #include <map>
+#include <vector>
+#include <set>
 
 namespace logic {
 
@@ -13,15 +14,28 @@ public:
   static constexpr auto MAX_VARIABLES = 16;
 
 private:
-  uint8_t mNumVariables;
   std::vector<std::bitset<MAX_VARIABLES>> mData;
-  std::map<std::string_view, uint8_t> mOffsets;
+  std::set<std::string_view> mVariables;
+  size_t mCurrentIndex = 0;
 
 public:
-  Environment(uint8_t numVariables);
 
-  auto defineVariable(std::string_view) -> void;
-  auto readVariable(std::string_view) -> std::vector<bool>;
+  auto define(std::string_view) -> void;
+  auto read(std::string_view) const -> std::vector<bool>;
+
+  constexpr auto createBoolean(bool value) const -> std::vector<bool> {
+    auto size = 1 << mVariables.size();
+    std::vector<bool> result(size);
+
+    for (auto i=0; i< 1 << size; i++) {
+      result[i] = value;
+    }
+    return result;
+  }
+
+  constexpr auto totalVariablesDefined() -> size_t {
+    return mVariables.size();
+  }
 };
 
 }
