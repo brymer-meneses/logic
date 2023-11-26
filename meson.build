@@ -7,6 +7,8 @@ sources = [
 
   'logic/evaluation/evaluator.cc',
   'logic/evaluation/environment.cc',
+
+  'logic/logic.cc',
 ]
 
 cpp_args = [

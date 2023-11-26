@@ -20,7 +20,7 @@ private:
 
 public:
 
-  auto define(std::string_view) -> void;
+  auto define(std::string_view) -> bool;
   auto read(std::string_view) const -> std::vector<bool>;
 
   constexpr auto createBoolean(bool value) const -> std::vector<bool> {

@@ -31,7 +31,7 @@ public:
   requires std::is_constructible_v<ValueType, T>
   constexpr ParserError(T value) : value(value) {}
 
-  constexpr auto accept(auto visitor) -> decltype(auto) {
+  constexpr auto accept(auto visitor) const -> decltype(auto) {
     return std::visit(visitor, value);
   } 
 };

@@ -18,10 +18,10 @@ TEST(Scanner, TestKeywords) {
 
   if (not tokens.has_value()) {
     FAIL() << tokens.error().accept(overloaded {
-        [](ScannerError::UnexpectedKeyword &e) {
+        [](const ScannerError::UnexpectedKeyword &e) {
           return std::format("Unexpected keyword `{}`", e.keyword);
         },
-        [](ScannerError::UnexpectedCharacter &e) {
+        [](const ScannerError::UnexpectedCharacter &e) {
           return std::format("Unexpected character `{}`", e.character);
         }}
       );

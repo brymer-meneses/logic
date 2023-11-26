@@ -1,11 +1,10 @@
 #pragma once
 
-#include "utils.h"
-#include <array>
 #include <variant>
-#include <iostream>
 #include <vector>
 #include <format>
+
+#include "logic/utils.h"
 
 namespace logic {
 

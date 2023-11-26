@@ -4,8 +4,11 @@
 
 using namespace logic;
 
-auto Environment::define(std::string_view variableName) -> void {
-  if (mVariables.contains(variableName)) return;
+auto Environment::define(std::string_view variableName) -> bool {
+  if (mVariables.contains(variableName)) return true;
+  if (mVariables.size() + 1 > MAX_VARIABLES) {
+    return false;
+  }
 
   mVariables.insert(variableName);
 
@@ -15,6 +18,8 @@ auto Environment::define(std::string_view variableName) -> void {
   for (auto i = (1 << mVariables.size()) - 1; i >= 0; i--) {
     mData.push_back(i);
   }
+
+  return true;
 }
 
 auto Environment::read(std::string_view variableName) const -> std::vector<bool> {

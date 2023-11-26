@@ -18,8 +18,12 @@ class EvaluatorError {
 public:
   struct InvalidVariableName {
     Token variable;
-
     explicit InvalidVariableName(Token variable) : variable(variable) {}
+  };
+
+  struct MaximumVariablesAchieved {
+    SourceLocation location;
+    explicit MaximumVariablesAchieved(SourceLocation location) : location(location) {}
   };
 
 private:
@@ -37,20 +41,22 @@ public:
 };
 
 class Evaluator {
+
+private:
   Environment mEnvironment;
 
 private:
   auto initializeEnvironment(const Sentence&) -> void;
   auto internalEvaluate(const Sentence&) const -> std::expected<Value, EvaluatorError>;
 
-public:
-  auto evaluate(const Sentence&) -> std::expected<Value, EvaluatorError>;
-
   auto negation(Value) const -> Value;
   auto conjunction(Value, Value) const -> Value;
   auto disjunction(Value, Value) const -> Value;
   auto implication(Value, Value) const -> Value;
   auto bijection(Value, Value) const -> Value;
+
+public:
+  auto evaluate(const Sentence&) -> std::expected<Value, EvaluatorError>;
 };
 
 }
