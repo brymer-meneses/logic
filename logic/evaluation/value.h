@@ -5,15 +5,14 @@
 #include <variant>
 #include <iostream>
 #include <vector>
+#include <format>
 
 namespace logic {
 
 class Value {
 
-private:
-  std::vector<bool> data;
-
 public:
+  std::vector<bool> data;
 
   constexpr Value(bool value) : data{value} {}
   constexpr Value(std::vector<bool> value) : data(value) {}
@@ -26,9 +25,6 @@ public:
   }
 
   friend constexpr auto operator==(const Value&, const Value&) -> bool = default;
-  friend constexpr auto operator<<(std::ostream& stream, const Value& line) -> std::ostream&;
-
-  friend class Evaluator;
 };
 
 }

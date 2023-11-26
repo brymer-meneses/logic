@@ -1,9 +1,10 @@
 #pragma once
 
-#include "logic/sentence.h"
+#include "logic/evaluation/value.h"
+#include "logic/parsing/sentence.h"
+#include "logic/evaluation/environment.h"
+
 #include "logic/utils.h"
-#include "logic/value.h"
-#include "logic/environment.h"
 
 #include <string_view>
 #include <vector>

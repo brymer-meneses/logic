@@ -1,4 +1,4 @@
-#include "logic/scanner.h"
+#include "logic/parsing/scanner.h"
 #include "logic/utils.h"
 
 using namespace logic;
@@ -6,11 +6,8 @@ using namespace logic;
 auto Scanner::scan() -> std::expected<std::vector<Token>, ScannerError> {
   auto tokens = std::vector<Token>{};
   while (not isAtEnd()) {
-    auto token = scanNextToken();
-    if (not token) {
-      return std::unexpected(token.error());
-    }
-    tokens.push_back(*token);
+    auto token = TRY(scanNextToken());
+    tokens.push_back(token);
   }
 
   tokens.push_back(buildToken(TokenType::EndOfFile));
@@ -26,10 +23,6 @@ auto Scanner::scanNextToken() -> std::expected<Token, ScannerError> {
       return buildToken(TokenType::LeftParen);
     case ')':
       return buildToken(TokenType::RightParen);
-    case 'P':
-    case 'S':
-    case 'Q':
-      return buildToken(TokenType::Variable);
 
     default:
       if (isalpha(c)) {
@@ -40,30 +33,26 @@ auto Scanner::scanNextToken() -> std::expected<Token, ScannerError> {
   }
 }
 
-static constexpr auto keywordLookup(std::string_view lexeme) -> std::expected<TokenType, ScannerError> {
+static constexpr auto keywordLookup(std::string_view lexeme) -> TokenType {
+
   if (lexeme == "TRUE" ) {
     return TokenType::True;
-  }  
-  if (lexeme == "FALSE") {
+  } else if (lexeme == "FALSE") {
     return TokenType::False;
+  } else if (lexeme == "NOT") {
+    return TokenType::Not;
+  } else if (lexeme == "AND") {
+    return TokenType::And;
+  } else if (lexeme == "OR") {
+    return TokenType::Or;
+  } else if (lexeme == "IMPLIES") {
+    return TokenType::Implies;
+  } else if (lexeme == "EQUIVALENT") {
+    return TokenType::Equivalent;
+  } else {
+    return TokenType::Variable;
   }
 
-  if (lexeme == "NOT") {
-    return TokenType::Not;
-  }
-  if (lexeme == "AND") {
-    return TokenType::And;
-  }
-  if (lexeme == "OR") {
-    return TokenType::Or;
-  }
-  if (lexeme == "IMPLIES") {
-    return TokenType::Implies;
-  }
-  if (lexeme == "EQUIVALENT") {
-    return TokenType::Equivalent;
-  }
-  return std::unexpected(ScannerError::UnexpectedKeyword(lexeme));
 }
 
 auto Scanner::scanKeyword() -> std::expected<Token, ScannerError> {
@@ -71,7 +60,7 @@ auto Scanner::scanKeyword() -> std::expected<Token, ScannerError> {
     advance();
   }
   auto lexeme = mSource.substr(mStart, mCurrent - mStart);
-  auto type = TRY(keywordLookup(lexeme));
+  auto type = keywordLookup(lexeme);
   return buildToken(type);
 }
 

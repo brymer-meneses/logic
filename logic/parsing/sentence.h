@@ -1,6 +1,7 @@
 #pragma once
 
-#include "logic/token.h"
+#include "logic/parsing/token.h"
+#include "utils.h"
 
 #include <memory>
 #include <variant>
@@ -77,5 +78,7 @@ private:
   ValueType value;
 
 };
+
+auto sentenceAsString(const Sentence& s) -> std::string;
 
 }

@@ -3,17 +3,14 @@
 
 #include <gtest/gtest.h>
 
-#include "logic/evaluator.h"
-#include "logic/scanner.h"
-#include "logic/parser.h"
-#include "logic/value.h"
+#include "logic/evaluation/evaluator.h"
+#include "logic/evaluation/value.h"
+#include "logic/parsing/scanner.h"
+#include "logic/parsing/parser.h"
 #include "logic/utils.h"
 
 using namespace logic;
 
-constexpr auto logic::operator<<(std::ostream& stream, const Value& value) -> std::ostream& {
-  return stream << std::format("{})", value.data);
-}
 
 auto verifyResult(std::string_view source, Value expectedValue) {
 

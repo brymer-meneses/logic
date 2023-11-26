@@ -1,9 +1,9 @@
 
-#include "logic/evaluator.h"
-#include "logic/environment.h"
+#include "logic/evaluation/evaluator.h"
+#include "logic/evaluation/environment.h"
+#include "logic/parsing/scanner.h"
+#include "logic/parsing/parser.h"
 #include "logic/utils.h"
-#include "logic/scanner.h"
-#include "logic/parser.h"
 
 #include <set>
 #include <ranges>

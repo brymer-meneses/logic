@@ -5,8 +5,8 @@
 #include <expected>
 #include <variant>
 
-#include <logic/token.h>
-#include <logic/sentence.h>
+#include <logic/parsing/token.h>
+#include <logic/parsing/sentence.h>
 
 namespace logic {
 

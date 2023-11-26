@@ -1,5 +1,5 @@
 
-#include <logic/parser.h>
+#include <logic/parsing/parser.h>
 #include <logic/utils.h>
 
 using namespace logic;
@@ -69,8 +69,11 @@ auto Parser::parseBinaryRHS(int prevPrec, Sentence lhs) -> std::expected<Sentenc
     auto rhs = TRY(parsePrimary());
 
     auto nextPrec = getTokenPrecedence(peek().type);
-    if (tokenPrec < nextPrec) {
-      rhs = TRY(parseBinaryRHS(tokenPrec + 1, std::move(rhs)));
+    if (tokenPrec <= nextPrec) {
+      // NOTE: We prefer right associativity so we make the 'tokenPrec' which is the
+      //       current operator precedence, and prefer the other precedence.
+      //       This is needed since '=>' and '<=>' are right associative.
+      rhs = TRY(parseBinaryRHS(tokenPrec-1, std::move(rhs)));
     }
 
     lhs = Sentence::Compound(binOp, std::move(lhs), std::move(rhs));

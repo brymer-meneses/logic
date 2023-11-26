@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
 
-#include <logic/sentence.h>
-#include <logic/scanner.h>
-#include <logic/token.h>
-#include <logic/parser.h>
+#include <logic/parsing/sentence.h>
+#include <logic/parsing/scanner.h>
+#include <logic/parsing/token.h>
+#include <logic/parsing/parser.h>
 #include <logic/utils.h>
+
+#include "tests/printer.h"
 
 using namespace logic;
 
@@ -96,4 +98,19 @@ TEST(Parser, TestOperatorPrecedence) {
     )
   );
   verifySentence("P AND Q OR P", std::move(sentence));
+}
+
+TEST(Parser, TestImplicationAssociativity) {
+  auto sentence = Sentence::Compound(
+    Token(TokenType::Implies, DUMMY_LOCATION, "IMPLIES"),
+    Sentence::Variable(
+      Token(TokenType::Variable, DUMMY_LOCATION, "P")
+    ),
+    Sentence::Compound(
+      Token(TokenType::Implies, DUMMY_LOCATION, "IMPLIES"), 
+      Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "Q")),
+      Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "S"))
+    )
+  );
+  verifySentence("P IMPLIES Q IMPLIES S", std::move(sentence));
 }

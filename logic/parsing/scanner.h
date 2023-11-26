@@ -6,7 +6,7 @@
 #include <variant>
 #include <format>
 
-#include "logic/token.h"
+#include "logic/parsing/token.h"
 
 namespace logic {
 

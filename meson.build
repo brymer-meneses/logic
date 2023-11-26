@@ -1,10 +1,12 @@
 project('logic', 'cpp', version: '0.0.1')
 
 sources = [
-  'logic/scanner.cc',
-  'logic/parser.cc',
-  'logic/evaluator.cc',
-  'logic/environment.cc',
+  'logic/parsing/scanner.cc',
+  'logic/parsing/parser.cc',
+  'logic/parsing/sentence.cc',
+
+  'logic/evaluation/evaluator.cc',
+  'logic/evaluation/environment.cc',
 ]
 
 cpp_args = [
@@ -39,6 +41,8 @@ test_sources = [
   'tests/testParser.cc',
   'tests/testEvaluator.cc',
   'tests/testEnvironment.cc',
+
+  'tests/printer.cc',
 ]
 
 test_runner = executable(

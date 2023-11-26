@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
 
-#include "logic/environment.h"
+#include "logic/evaluation/environment.h"
 
 using namespace logic;
 

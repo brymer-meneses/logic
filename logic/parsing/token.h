@@ -56,7 +56,7 @@ constexpr auto tokenTypeToString(TokenType type) -> std::string_view {
     case TokenType::Implies:
       return "=>";
     case TokenType::Equivalent:
-      return "EQUIVALENT";
+      return "<=>";
     case TokenType::EndOfFile:
       return "EOF";
   }

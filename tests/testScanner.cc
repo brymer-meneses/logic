@@ -3,8 +3,8 @@
 
 #include <gtest/gtest.h>
 
-#include <logic/scanner.h>
-#include <logic/token.h>
+#include <logic/parsing/scanner.h>
+#include <logic/parsing/token.h>
 #include <logic/utils.h>
 
 using namespace logic;
