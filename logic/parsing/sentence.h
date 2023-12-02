@@ -76,12 +76,12 @@ public:
   }
 
   friend constexpr auto operator==(const Sentence&, const Sentence&) -> bool = default;
+  friend auto sentenceAsString(const Sentence& s) -> std::string;
 
 private:
   ValueType value;
 
 };
 
-auto sentenceAsString(const Sentence& s) -> std::string;
 
 }

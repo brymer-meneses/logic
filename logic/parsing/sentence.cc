@@ -8,7 +8,7 @@
 auto logic::sentenceAsString(const Sentence& s) -> std::string {
   return s.accept(overloaded {
     [](const Sentence::Grouped& s) {
-      return std::format("({})",sentenceAsString(*s.sentence));
+      return std::format("({})", sentenceAsString(*s.sentence));
     },
     [](const Sentence::Value& s) {
       return std::format("{}", tokenTypeToString(s.value.type));
@@ -20,10 +20,15 @@ auto logic::sentenceAsString(const Sentence& s) -> std::string {
       return std::format("{}", s.identifier.lexeme);
     },
     [](const Sentence::Compound& s) {
-      return std::format("{} {} {}", 
-                         sentenceAsString(*s.left), 
-                         tokenTypeToString(s.connective.type), 
-                         sentenceAsString(*s.right));
+      auto right = sentenceAsString(*s.right);
+      auto left = sentenceAsString(*s.left);
+      if (s.right->is<Sentence::Compound>()) {
+        right = std::format("({})", right);
+      }
+      if (s.left->is<Sentence::Compound>()) {
+        left = std::format("({})", left);
+      }
+      return std::format("{} {} {}", left, tokenTypeToString(s.connective.type), right);
     },
   });
 
