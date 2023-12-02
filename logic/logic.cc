@@ -66,6 +66,9 @@ auto Logic::report(const ScannerError& e) -> void {
     [](const ScannerError::UnexpectedKeyword &e) {
       return std::format("Unexpected keyword `{}`", e.keyword);
     },
+    [](const ScannerError::InvalidVariableName &e) {
+      return std::format("Invalid variable name `{}`. Variables must have length 1", e.name);
+    },
     [](const ScannerError::UnexpectedCharacter &e) {
       return std::format("Unexpected character `{}`", e.character);
     }

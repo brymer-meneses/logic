@@ -61,6 +61,9 @@ auto Scanner::scanKeyword() -> std::expected<Token, ScannerError> {
   }
   auto lexeme = mSource.substr(mStart, mCurrent - mStart);
   auto type = keywordLookup(lexeme);
+  if (lexeme.length() != 1 and type == TokenType::Variable) {
+    return std::unexpected(ScannerError::InvalidVariableName(lexeme));
+  }
   return buildToken(type);
 }
 

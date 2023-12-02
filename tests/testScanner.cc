@@ -23,6 +23,9 @@ TEST(Scanner, TestKeywords) {
         [](const ScannerError::UnexpectedKeyword &e) {
           return std::format("Unexpected keyword `{}`", e.keyword);
         },
+        [](const ScannerError::InvalidVariableName &e) {
+          return std::format("Invalid Variable name`{}`", e.name);
+        },
         [](const ScannerError::UnexpectedCharacter &e) {
           return std::format("Unexpected character `{}`", e.character);
         }}

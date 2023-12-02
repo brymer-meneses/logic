@@ -21,9 +21,13 @@ public:
     std::string_view keyword;
     constexpr UnexpectedKeyword(std::string_view keyword) : keyword(keyword) {}
   };
+  struct InvalidVariableName {
+    std::string_view name;
+    constexpr InvalidVariableName(std::string_view name) : name(name) {}
+  };
 
 private:
-  using ValueType = std::variant<UnexpectedCharacter, UnexpectedKeyword>;
+  using ValueType = std::variant<UnexpectedCharacter, UnexpectedKeyword, InvalidVariableName>;
   ValueType value;
 
 public:
