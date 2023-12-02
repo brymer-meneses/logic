@@ -120,6 +120,7 @@ auto Evaluator::printEvaluation() -> void {
 auto Evaluator::recordSentenceEvaluation(const Sentence& sentence, const Value& result) const -> void {
   if (sentence.is<Sentence::Variable>()) return;
   if (sentence.is<Sentence::Value>()) return;
+  if (sentence.is<Sentence::Grouped>()) return;
 
   auto stringRep = sentenceAsString(sentence);
   for (const auto& column : mTable.columns()) {
