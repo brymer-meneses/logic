@@ -1,9 +1,15 @@
 #include <print>
 
-#include "logic/utils/table.h"
+#include "logic/logic.h"
 
 using namespace logic;
 
 auto main(int argc, const char** argv) -> int {
-  std::println("Hello world!");
+  if (argc == 1) {
+    Logic::runREPL();
+  } else if (argc == 2) {
+    Logic::runFile(argv[1]);
+  } else {
+    std::println(stderr, "Usage: logic <source>");
+  }
 }

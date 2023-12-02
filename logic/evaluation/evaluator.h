@@ -5,7 +5,7 @@
 #include "logic/evaluation/environment.h"
 
 #include "logic/utils/macros.h"
-#include "utils/table.h"
+#include "logic/utils/table.h"
 
 #include <string_view>
 #include <vector>
@@ -45,14 +45,14 @@ class Evaluator {
 
 private:
   Environment mEnvironment;
-  Table table;
+  mutable Table mTable;
 
 private:
   auto initializeEnvironment(const Sentence&) -> void;
   auto internalEvaluate(const Sentence&) const -> std::expected<Value, EvaluatorError>;
 
-  auto printValue(const Value&) -> void;
-  auto printEnvironment() -> void;
+  auto recordSentenceEvaluation(const Sentence&, const Value&) const -> void;
+  auto recordEnvironment() const -> void;
 
   auto negation(Value) const -> Value;
   auto conjunction(Value, Value) const -> Value;
@@ -62,6 +62,8 @@ private:
 
 public:
   auto evaluate(const Sentence&) -> std::expected<Value, EvaluatorError>;
+
+  auto printEvaluation() -> void;
 };
 
 }

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "logic/parsing/token.h"
-#include "logic/utils/macros.h"
 
 #include <memory>
 #include <variant>
@@ -71,6 +70,10 @@ public:
   constexpr auto accept(auto visitor) const -> decltype(auto) {
     return std::visit(visitor, value);
   } 
+  template <typename T>
+  constexpr auto is() const -> bool {
+    return std::holds_alternative<T>(value);
+  }
 
   friend constexpr auto operator==(const Sentence&, const Sentence&) -> bool = default;
 

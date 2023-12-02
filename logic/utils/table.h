@@ -36,25 +36,28 @@ public:
 
 class Table {
 private:
-  std::vector<Column> columns;
-  size_t padding = 1;
-  size_t maxColumnLength = 0;
+  std::vector<Column> mColumns;
+  size_t mPadding = 1;
+  size_t mMaxColumnLength = 0;
 
 public:
   constexpr auto numberOfColumns() const -> size_t { 
-    return columns.size(); 
+    return mColumns.size(); 
+  }
+  constexpr auto columns() const -> const std::vector<Column>& { 
+    return mColumns; 
   }
   constexpr auto setPadding(size_t value) -> void {
-    padding = value;
+    mPadding = value;
   }
   constexpr auto add(Column column) -> void {
     // columns must have the same number of cells
-    if (maxColumnLength == 0) {
-      maxColumnLength = column.numberOfCells();
+    if (mMaxColumnLength == 0) {
+      mMaxColumnLength = column.numberOfCells();
     } else {
-      ASSERT(maxColumnLength == column.numberOfCells());
+      ASSERT(mMaxColumnLength == column.numberOfCells());
     }
-    columns.push_back(column);
+    mColumns.push_back(column);
   }
   auto print() const -> void;
 private:

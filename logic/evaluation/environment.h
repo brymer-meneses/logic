@@ -35,6 +35,10 @@ public:
   constexpr auto totalVariablesDefined() -> size_t {
     return mVariables.size();
   }
+
+  constexpr auto variables() const -> const std::set<std::string_view>& {
+    return mVariables;
+  }
 };
 
 }

@@ -40,6 +40,7 @@ auto Evaluator::negation(Value v) const -> Value {
 
 auto Evaluator::evaluate(const Sentence& sentence) -> std::expected<Value, EvaluatorError> {
   initializeEnvironment(sentence);
+  recordEnvironment();
   return internalEvaluate(sentence);
 }
 
@@ -56,33 +57,45 @@ auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expecte
       [this](const Sentence::Grouped& s) -> std::expected<Value, EvaluatorError> {
         return internalEvaluate(*s.sentence);
       },
-      [this](const Sentence::Negated& s) -> std::expected<Value, EvaluatorError> {
+      [this, &sentence](const Sentence::Negated& s) -> std::expected<Value, EvaluatorError> {
         const auto rhs = TRY(internalEvaluate(*s.sentence));
-        return negation(rhs);
+        const auto result = negation(rhs);
+        recordSentenceEvaluation(sentence, result);
+        return result;
       },
-      [this](const Sentence::Compound& s) -> std::expected<Value, EvaluatorError> {
+      [this, &sentence](const Sentence::Compound& s) -> std::expected<Value, EvaluatorError> {
         const auto lhs = TRY(internalEvaluate(*s.left));
         const auto rhs = TRY(internalEvaluate(*s.right));
 
+        Value result{};
         switch (s.connective.type) {
           case TokenType::And: 
-            return conjunction(lhs, rhs);
+            result = conjunction(lhs, rhs);
+            break;
           case TokenType::Or: 
-            return disjunction(lhs, rhs);
+            result = disjunction(lhs, rhs);
+            break;
           case TokenType::Implies:
-            return implication(lhs, rhs);
+            result = implication(lhs, rhs);
+            break;
           case TokenType::Equivalent:
-            return bijection(lhs, rhs);
+            result = bijection(lhs, rhs);
+            break;
           default:
             std::unreachable();
         }
+
+        recordSentenceEvaluation(*s.left, lhs);
+        recordSentenceEvaluation(*s.right, rhs);
+        recordSentenceEvaluation(sentence, result);
+        return result;
       },
     }
   );
 }
 
-auto Evaluator::initializeEnvironment(const Sentence& s) -> void {
-  s.accept(overloaded {
+auto Evaluator::initializeEnvironment(const Sentence& sentence) -> void {
+  sentence.accept(overloaded {
     [&](const Sentence::Variable& s){ 
       mEnvironment.define(s.identifier.lexeme);
     },
@@ -100,11 +113,35 @@ auto Evaluator::initializeEnvironment(const Sentence& s) -> void {
   });
 }
 
-auto Evaluator::printValue(const Value& value) -> void {
+auto Evaluator::printEvaluation() -> void {
+  mTable.print();
+}
+
+auto Evaluator::recordSentenceEvaluation(const Sentence& sentence, const Value& result) const -> void {
+  if (sentence.is<Sentence::Variable>()) return;
+  if (sentence.is<Sentence::Value>()) return;
+
+  auto stringRep = sentenceAsString(sentence);
+  for (const auto& column : mTable.columns()) {
+    if (column[0] == stringRep) { return; }
+  }
+
   Column column;
-  for (const auto& boolean : value.data) {
+  column.add(stringRep);
+  for (const auto& boolean : result.data) {
     column.add( boolean ? "T" : "F" );
   }
-  table.add(std::move(column));
+  mTable.add(std::move(column));
+}
+
+auto Evaluator::recordEnvironment() const -> void {
+  for (const auto& variable : mEnvironment.variables()) {
+    Column column;
+    column.add(std::string(variable));
+    for (const auto& boolean : mEnvironment.read(variable)) {
+      column.add( boolean ? "T" : "F" );
+    }
+    mTable.add(std::move(column));
+  }
 }
 

@@ -3,6 +3,7 @@
 #include "logic/utils/overloaded.h"
 
 #include <string>
+#include <format>
 
 auto logic::sentenceAsString(const Sentence& s) -> std::string {
   return s.accept(overloaded {
@@ -19,7 +20,7 @@ auto logic::sentenceAsString(const Sentence& s) -> std::string {
       return std::format("{}", s.identifier.lexeme);
     },
     [](const Sentence::Compound& s) {
-      return std::format("({} {} {})", 
+      return std::format("{} {} {}", 
                          sentenceAsString(*s.left), 
                          tokenTypeToString(s.connective.type), 
                          sentenceAsString(*s.right));

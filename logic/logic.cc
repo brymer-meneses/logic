@@ -3,6 +3,7 @@
 #include "logic/parsing/parser.h"
 #include "logic/utils/overloaded.h"
 
+#include <iostream>
 
 using namespace logic;
 
@@ -12,7 +13,7 @@ auto Logic::run(std::string_view source) -> void {
 
   if (not tokens.has_value()) {
     Logic::report(tokens.error());
-    exit(1);
+    return;
   }
 
   auto parser = Parser(std::move(*tokens));
@@ -20,6 +21,7 @@ auto Logic::run(std::string_view source) -> void {
 
   if (not sentences.has_value()) {
     Logic::report(sentences.error());
+    return;
   }
 
   for (const auto& sentence : *sentences) {
@@ -27,7 +29,22 @@ auto Logic::run(std::string_view source) -> void {
     auto value = evaluator.evaluate(sentence);
     if (not value.has_value()) {
       Logic::report(value.error());
+      return;
     }
+
+    evaluator.printEvaluation();
+  }
+}
+
+auto Logic::runREPL() -> void {
+  while (true) {
+    std::string source;
+    std::print(">>> ");
+    
+    // Break the loop on EOF or other error
+    if (not std::getline(std::cin, source)) { break; }
+
+    run(source);
   }
 }
 
