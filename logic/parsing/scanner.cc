@@ -1,5 +1,5 @@
 #include "logic/parsing/scanner.h"
-#include "logic/utils.h"
+#include "logic/utils/macros.h"
 
 using namespace logic;
 

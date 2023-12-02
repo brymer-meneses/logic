@@ -4,7 +4,9 @@
 #include <logic/parsing/scanner.h>
 #include <logic/parsing/token.h>
 #include <logic/parsing/parser.h>
-#include <logic/utils.h>
+
+#include <logic/utils/macros.h>
+#include <logic/utils/overloaded.h>
 
 #include "tests/printer.h"
 

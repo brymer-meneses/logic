@@ -1,7 +1,7 @@
 #pragma once
 
 #include "logic/parsing/token.h"
-#include "logic/utils.h"
+#include "logic/utils/macros.h"
 
 #include <memory>
 #include <variant>

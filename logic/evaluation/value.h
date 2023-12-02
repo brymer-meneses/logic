@@ -4,7 +4,7 @@
 #include <vector>
 #include <format>
 
-#include "logic/utils.h"
+#include "logic/utils/macros.h"
 
 namespace logic {
 

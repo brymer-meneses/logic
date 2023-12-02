@@ -16,7 +16,6 @@ public:
 private:
   std::vector<std::bitset<MAX_VARIABLES>> mData;
   std::set<std::string_view> mVariables;
-  size_t mCurrentIndex = 0;
 
 public:
 

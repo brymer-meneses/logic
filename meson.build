@@ -9,6 +9,8 @@ sources = [
   'logic/evaluation/environment.cc',
 
   'logic/logic.cc',
+
+  'logic/utils/table.cc',
 ]
 
 cpp_args = [

@@ -1,6 +1,9 @@
-
 #include <print>
 
+#include "logic/utils/table.h"
+
+using namespace logic;
+
 auto main(int argc, const char** argv) -> int {
-  std::println("{}", argv[argc-1]);
+  std::println("Hello world!");
 }

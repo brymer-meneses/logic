@@ -3,7 +3,9 @@
 #include "logic/evaluation/environment.h"
 #include "logic/parsing/scanner.h"
 #include "logic/parsing/parser.h"
-#include "logic/utils.h"
+
+#include "logic/utils/macros.h"
+#include "logic/utils/overloaded.h"
 
 #include <set>
 #include <ranges>
@@ -97,3 +99,12 @@ auto Evaluator::initializeEnvironment(const Sentence& s) -> void {
     [](const Sentence::Value& s) {},
   });
 }
+
+auto Evaluator::printValue(const Value& value) -> void {
+  Column column;
+  for (const auto& boolean : value.data) {
+    column.add( boolean ? "T" : "F" );
+  }
+  table.add(std::move(column));
+}
+

@@ -4,7 +4,8 @@
 #include "logic/parsing/sentence.h"
 #include "logic/evaluation/environment.h"
 
-#include "logic/utils.h"
+#include "logic/utils/macros.h"
+#include "utils/table.h"
 
 #include <string_view>
 #include <vector>
@@ -44,10 +45,14 @@ class Evaluator {
 
 private:
   Environment mEnvironment;
+  Table table;
 
 private:
   auto initializeEnvironment(const Sentence&) -> void;
   auto internalEvaluate(const Sentence&) const -> std::expected<Value, EvaluatorError>;
+
+  auto printValue(const Value&) -> void;
+  auto printEnvironment() -> void;
 
   auto negation(Value) const -> Value;
   auto conjunction(Value, Value) const -> Value;

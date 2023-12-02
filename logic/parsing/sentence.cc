@@ -1,5 +1,6 @@
 #include "logic/parsing/sentence.h"
 #include "logic/parsing/token.h"
+#include "logic/utils/overloaded.h"
 
 #include <string>
 

@@ -1,5 +1,5 @@
 #include "logic/evaluation/environment.h"
-#include "logic/utils.h"
+#include "logic/utils/macros.h"
 #include <print>
 
 using namespace logic;

@@ -5,7 +5,9 @@
 
 #include <logic/parsing/scanner.h>
 #include <logic/parsing/token.h>
-#include <logic/utils.h>
+
+#include <logic/utils/macros.h>
+#include <logic/utils/overloaded.h>
 
 using namespace logic;
 
