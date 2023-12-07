@@ -127,7 +127,7 @@ auto Evaluator::recordSentenceEvaluation(const Sentence& sentence, const Value& 
     if (column[0] == stringRep) { return; }
   }
 
-  Column column;
+  Column column(result.data.size());
   column.add(stringRep);
   for (const auto& boolean : result.data) {
     column.add( boolean ? "T" : "F" );
@@ -137,8 +137,8 @@ auto Evaluator::recordSentenceEvaluation(const Sentence& sentence, const Value& 
 
 auto Evaluator::recordEnvironment() const -> void {
   for (const auto& variable : mEnvironment.variables()) {
-    Column column;
-    column.add(std::string(variable));
+    Column column(variable.size() + 1);
+    column.add(variable);
     for (const auto& boolean : mEnvironment.read(variable)) {
       column.add( boolean ? "T" : "F" );
     }

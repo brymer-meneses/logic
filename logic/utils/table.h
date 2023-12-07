@@ -15,9 +15,14 @@ private:
   size_t maxCellWidth = 0;
 
 public:
-  constexpr auto add(std::string cell) -> void {
+  constexpr Column(size_t size)  {
+    cells.reserve(size);
+  }
+  constexpr Column() { }
+
+  constexpr auto add(std::string_view cell) -> void {
     maxCellWidth = std::max(cell.length(), maxCellWidth);
-    cells.push_back(cell);
+    cells.push_back(std::string(cell));
   }
   constexpr auto numberOfCells() const -> size_t {
     return cells.size();
