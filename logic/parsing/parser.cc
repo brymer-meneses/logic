@@ -95,7 +95,7 @@ auto Parser::parseAtomicSentence() -> std::expected<Sentence, ParserError> {
     return Sentence::Variable(peekPrevious());
   }
 
-  RAISE_INTERNAL_ERROR("Unreachable");
+  std::unreachable();
 }
 
 
