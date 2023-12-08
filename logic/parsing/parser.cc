@@ -17,6 +17,7 @@ auto Parser::parseSentence() -> std::expected<Sentence, ParserError> {
   return parseCompoundSentence();
 }
 
+// FIXME: this crashes when input is '('
 auto Parser::parseGroupedSentence() -> std::expected<Sentence, ParserError> {
   auto sentence = TRY(parseSentence());
 

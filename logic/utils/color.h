@@ -3,12 +3,13 @@
 #include <cctype>
 #include <format>
 #include <string>
+#include <print>
 
 namespace logic {
 
 template <typename T>
-concept Printable = requires(std::ostream &os, const T &msg) {
-  { os << msg };
+concept Printable = requires(const T& msg) {
+  { std::println("{}", msg)};
 };
 
 class Color {
@@ -22,6 +23,7 @@ class Color {
     Purple = 35,
     Cyan = 36,
     White = 37,
+    Gray = 90,
   };
 
 public:
@@ -49,6 +51,7 @@ public:
   DEFINE_COLOR(Yellow);
   DEFINE_COLOR(Purple);
   DEFINE_COLOR(White);
+  DEFINE_COLOR(Gray);
   DEFINE_COLOR(Cyan);
 };
 
