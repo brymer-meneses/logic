@@ -44,7 +44,7 @@ auto verifySentence(std::string_view source, Sentence sentence) -> void {
   EXPECT_EQ(sentence, sentences->at(0));
 } 
 
-static constexpr auto DUMMY_LOCATION = SourceLocation(0, 0, 0);
+static constexpr auto DUMMY_LOCATION = SourceLocation(0, 0, 0, "DUMMY");
 
 TEST(Parser, TestVariableSentence) {
   auto sentence = Sentence::Variable(Token(TokenType::Variable, DUMMY_LOCATION, "P"));

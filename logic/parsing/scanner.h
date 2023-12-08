@@ -14,16 +14,19 @@ struct ScannerError {
 public:
   struct UnexpectedCharacter {
     char character;
-    constexpr UnexpectedCharacter(char character) : character(character) {}
+    SourceLocation location;
+    constexpr UnexpectedCharacter(char character, SourceLocation location) : character(character), location(location) {}
   };
 
   struct UnexpectedKeyword {
     std::string_view keyword;
-    constexpr UnexpectedKeyword(std::string_view keyword) : keyword(keyword) {}
+    SourceLocation location;
+    constexpr UnexpectedKeyword(std::string_view keyword, SourceLocation location) : keyword(keyword), location(location) {}
   };
   struct InvalidVariableName {
     std::string_view name;
-    constexpr InvalidVariableName(std::string_view name) : name(name) {}
+    SourceLocation location;
+    constexpr InvalidVariableName(std::string_view name, SourceLocation location) : name(name), location(location) {}
   };
 
 private:
@@ -48,10 +51,11 @@ class Scanner {
   std::vector<Token> mTokens;
 
   std::string_view mSource;
+  std::string_view mFilename;
 
 public:
-  constexpr Scanner(std::string_view source) 
-    : mSource(source) {}
+  constexpr Scanner(std::string_view source, std::string_view filename="REPL") 
+    : mSource(source), mFilename(filename) {}
 
   auto scan() -> std::expected<std::vector<Token>, ScannerError>;
 
@@ -65,6 +69,8 @@ private:
   constexpr auto advance() -> char;
   constexpr auto peek() const -> char;
   constexpr auto isAtEnd() const -> bool;
+
+  constexpr auto getCurrentLocation() const -> SourceLocation;
 
 };
 

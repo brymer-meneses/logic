@@ -39,7 +39,7 @@ auto Scanner::scanToken() -> std::expected<void, ScannerError> {
       if (std::isalpha(c)) {
         return scanKeyword();
       } else {
-        return std::unexpected(ScannerError::UnexpectedCharacter(c));
+        return std::unexpected(ScannerError::UnexpectedCharacter(c, getCurrentLocation()));
       }
   }
 
@@ -47,7 +47,7 @@ auto Scanner::scanToken() -> std::expected<void, ScannerError> {
 }
 
 auto Scanner::addToken(TokenType type) -> void {
-  auto linePosition = SourceLocation(mStart - mLastLine, mStart - mLastLine, mLine);
+  auto linePosition = getCurrentLocation();
   auto lexeme = mSource.substr(mStart, mCurrent - mStart);
   mTokens.emplace_back(type, linePosition, lexeme);
 }
@@ -80,7 +80,7 @@ auto Scanner::scanKeyword() -> std::expected<void, ScannerError> {
   auto lexeme = mSource.substr(mStart, mCurrent - mStart);
   auto type = keywordLookup(lexeme);
   if (lexeme.length() != 1 and type == TokenType::Variable) {
-    return std::unexpected(ScannerError::InvalidVariableName(lexeme));
+    return std::unexpected(ScannerError::InvalidVariableName(lexeme, getCurrentLocation()));
   }
 
   addToken(type);
@@ -113,4 +113,8 @@ constexpr auto Scanner::peek() const -> char {
     return '\0';
   }
   return mSource.at(mCurrent);
+}
+
+constexpr auto Scanner::getCurrentLocation() const -> SourceLocation {
+  return SourceLocation(mStart - mLastLine, mCurrent - mLastLine, mLine, mFilename);
 }

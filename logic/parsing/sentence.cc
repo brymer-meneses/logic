@@ -14,7 +14,7 @@ auto logic::sentenceAsString(const Sentence& s) -> std::string {
       return std::format("{}", tokenTypeToString(s.value.type));
     },
     [](const Sentence::Negated& s) {
-      return std::format("¬{}",sentenceAsString(*s.sentence));
+      return std::format("¬{}", sentenceAsString(*s.sentence));
     },
     [](const Sentence::Variable& s) {
       return std::format("{}", s.identifier.lexeme);

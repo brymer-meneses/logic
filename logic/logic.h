@@ -13,9 +13,8 @@ public:
 
 private:
   static auto run(std::string_view source) -> void;
-  static auto report(const EvaluatorError&) -> void;
-  static auto report(const ScannerError&) -> void;
-  static auto report(const ParserError&) -> void;
-
-
+  static auto report(const EvaluatorError&, std::string_view) -> void;
+  static auto report(const ScannerError&, std::string_view) -> void;
+  static auto report(const ParserError&, std::string_view) -> void;
+  static auto reportInternal(std::string_view message, SourceLocation location, std::string_view source) -> void;
 };

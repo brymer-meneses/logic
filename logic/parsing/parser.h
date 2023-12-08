@@ -17,6 +17,9 @@ public:
     TokenType expected;
     Token got;
 
+    // FIXME: this should be passed to the constructor
+    SourceLocation location{0, 0, 0, "DUMMY"};
+
     explicit ExpectedToken(TokenType expected, Token got) 
       : expected(expected)
       , got(got) {}
