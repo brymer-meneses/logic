@@ -13,3 +13,7 @@ auto logic::operator<<(std::ostream& stream, const Value& value) -> std::ostream
   return stream << std::format("Value({})", value.data);
 }
 
+auto logic::operator<<(std::ostream& stream, const TokenType& value) -> std::ostream& {
+  return stream << std::format("{}", tokenTypeToString(value));
+}
+

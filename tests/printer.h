@@ -6,6 +6,7 @@
 namespace logic {
 
 auto operator<<(std::ostream& stream, const Sentence& sentence) -> std::ostream&;
+auto operator<<(std::ostream& stream, const TokenType& token) -> std::ostream&;
 
 auto operator<<(std::ostream& stream, const Value& value) -> std::ostream&;
 

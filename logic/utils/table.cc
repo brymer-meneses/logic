@@ -8,7 +8,10 @@ using namespace logic;
 
 auto Table::print() const -> void {
   for (auto j = 0; j < mMaxColumnLength; j++) {
-    printSeparationLine();
+    if (j == 0 or j == 1) {
+      printSeparationLine();
+    }
+
     for (auto i = 0; i < mColumns.size(); i++) {
       // print the contents
       auto formatStr = std::format("|{{: ^{}}}", mColumns[i].getMaxWidth() + 2*mPadding);

@@ -44,8 +44,8 @@ class Scanner {
   size_t mStart = 0;
   size_t mCurrent = 0;
   size_t mLine = 1;
-
   size_t mLastLine = 0;
+  std::vector<Token> mTokens;
 
   std::string_view mSource;
 
@@ -56,18 +56,15 @@ public:
   auto scan() -> std::expected<std::vector<Token>, ScannerError>;
 
 private:
-  auto scanNextToken() -> std::expected<Token, ScannerError>;
-  auto scanKeyword() -> std::expected<Token, ScannerError>;
+  auto scanToken() -> std::expected<void, ScannerError>;
+  auto scanKeyword() -> std::expected<void, ScannerError>;
 
-  auto skipWhitespaces(char c) -> char;
+  auto addToken(TokenType) -> void;
+  auto match(char) -> bool;
 
-  auto advance() -> char;
-  auto match(const char) -> bool;
-
-  constexpr auto isAtEnd() const -> bool;
+  constexpr auto advance() -> char;
   constexpr auto peek() const -> char;
-  constexpr auto buildToken(TokenType) -> Token;
-
+  constexpr auto isAtEnd() const -> bool;
 
 };
 

@@ -3,6 +3,8 @@
 #include "logic/parsing/parser.h"
 #include "logic/utils/overloaded.h"
 
+#include <fstream>
+#include <sstream>
 #include <iostream>
 
 using namespace logic;
@@ -49,7 +51,21 @@ auto Logic::runREPL() -> void {
 }
 
 auto Logic::runFile(std::string_view filename) -> void {
+  std::ifstream file(filename);
+  std::stringstream source;
 
+  if (file.fail()) {
+    std::println(stderr, "LOGIC: File `{}` does not exist", filename);
+    exit(1);
+  }
+
+  if (file.is_open()) {
+    std::string line;
+    while (std::getline(file, line)) {
+      source << line << "\n";
+    }
+  }
+  run(source.str());
 }
 
 auto Logic::report(const ParserError& e) -> void {
@@ -57,7 +73,7 @@ auto Logic::report(const ParserError& e) -> void {
     [](const ParserError::ExpectedToken& e) {
       return std::format("Unexpected token {}, expected {}", e.got.lexeme, tokenTypeToString(e.expected));
     }
-    });
+  });
   std::println(stderr, "{}", message);
 }
 
@@ -70,7 +86,7 @@ auto Logic::report(const ScannerError& e) -> void {
       return std::format("Invalid variable name `{}`. Variables must have length 1", e.name);
     },
     [](const ScannerError::UnexpectedCharacter &e) {
-      return std::format("Unexpected character `{}`", e.character);
+      return std::format("Unexpected character `{}`", int(e.character));
     }
   });
   std::println(stderr, "{}", message);

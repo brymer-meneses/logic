@@ -4,101 +4,104 @@
 using namespace logic;
 
 auto Scanner::scan() -> std::expected<std::vector<Token>, ScannerError> {
-  auto tokens = std::vector<Token>{};
   while (not isAtEnd()) {
-    auto token = TRY(scanNextToken());
-    tokens.push_back(token);
+    mStart = mCurrent;
+    auto value = scanToken();
+    if (not value) { return std::unexpected(value.error()); }
   }
-
-  tokens.push_back(buildToken(TokenType::EndOfFile));
-  return tokens;
+  addToken(TokenType::EndOfFile);
+  return mTokens;
 }
 
-auto Scanner::scanNextToken() -> std::expected<Token, ScannerError> {
+auto Scanner::scanToken() -> std::expected<void, ScannerError> {
   auto c = advance();
-  c = skipWhitespaces(c);
-
   switch (c) {
+    case ' ':
+    case '\r':
+    case '\t':
+      break;
+    case '\n':
+      mLastLine = mCurrent - 1;
+      mLine += 1;
+      break;
+    case '#':
+      while (peek() != '\n' and not isAtEnd()) {
+        advance();
+      };
+      break;
     case '(':
-      return buildToken(TokenType::LeftParen);
+      addToken(TokenType::LeftParen);
+      break;
     case ')':
-      return buildToken(TokenType::RightParen);
-
-    default:
-      if (isalpha(c)) {
+      addToken(TokenType::RightParen);
+      break;
+    default: 
+      if (std::isalpha(c)) {
         return scanKeyword();
       } else {
         return std::unexpected(ScannerError::UnexpectedCharacter(c));
       }
   }
+
+  return {};
 }
 
-static constexpr auto keywordLookup(std::string_view lexeme) -> TokenType {
-
-  if (lexeme == "TRUE" ) {
-    return TokenType::True;
-  } else if (lexeme == "FALSE") {
-    return TokenType::False;
-  } else if (lexeme == "NOT") {
-    return TokenType::Not;
-  } else if (lexeme == "AND") {
-    return TokenType::And;
-  } else if (lexeme == "OR") {
-    return TokenType::Or;
-  } else if (lexeme == "IMPLIES") {
-    return TokenType::Implies;
-  } else if (lexeme == "EQUIVALENT") {
-    return TokenType::Equivalent;
-  } else {
-    return TokenType::Variable;
-  }
-
+auto Scanner::addToken(TokenType type) -> void {
+  auto linePosition = SourceLocation(mStart - mLastLine, mStart - mLastLine, mLine);
+  auto lexeme = mSource.substr(mStart, mCurrent - mStart);
+  mTokens.emplace_back(type, linePosition, lexeme);
 }
 
-auto Scanner::scanKeyword() -> std::expected<Token, ScannerError> {
+auto Scanner::scanKeyword() -> std::expected<void, ScannerError> {
+  static constexpr auto keywordLookup = [](std::string_view lexeme) -> TokenType {
+    if (lexeme == "TRUE" ) {
+      return TokenType::True;
+    } else if (lexeme == "FALSE") {
+      return TokenType::False;
+    } else if (lexeme == "NOT") {
+      return TokenType::Not;
+    } else if (lexeme == "AND") {
+      return TokenType::And;
+    } else if (lexeme == "OR") {
+      return TokenType::Or;
+    } else if (lexeme == "IMPLIES") {
+      return TokenType::Implies;
+    } else if (lexeme == "EQUIVALENT") {
+      return TokenType::Equivalent;
+    } else {
+      return TokenType::Variable;
+    }
+  };
+
   while (std::isalpha(peek())) {
     advance();
   }
+
   auto lexeme = mSource.substr(mStart, mCurrent - mStart);
   auto type = keywordLookup(lexeme);
   if (lexeme.length() != 1 and type == TokenType::Variable) {
     return std::unexpected(ScannerError::InvalidVariableName(lexeme));
   }
-  return buildToken(type);
+
+  addToken(type);
+  return {};
 }
 
-constexpr auto Scanner::buildToken(TokenType type) -> Token {
-  auto linePosition = SourceLocation(mStart - mLastLine, mStart - mLastLine, mLine);
-  auto lexeme = mSource.substr(mStart, mCurrent - mStart);
-  mStart = mCurrent;
-  return Token(type, linePosition, lexeme);
-}
 
-auto Scanner::skipWhitespaces(char c) -> char {
-  while (c == ' ' or c == '\t' or c == '\r' or c == '\n') {
-    mStart = mCurrent;
-    if (c == '\n') {
-      mLastLine = mCurrent - 1;
-      mLine += 1;
-    }
-    c = advance();
-  }
-  return c;
-}
 
-auto Scanner::advance() -> char {
-  if (isAtEnd()) {
-    return '\0';
-  }
-  return mSource[mCurrent++];
-}
-
-auto Scanner::match(const char character) -> bool {
-  if (peek() == character) {
+auto Scanner::match(char type) -> bool {
+  if (peek() == type) {
     mCurrent += 1;
     return true;
   }
   return false;
+}
+
+constexpr auto Scanner::advance() -> char {
+  if (isAtEnd()) {
+    return '\0';
+  }
+  return mSource.at(mCurrent++);
 }
 
 constexpr auto Scanner::isAtEnd() const -> bool {
@@ -109,5 +112,5 @@ constexpr auto Scanner::peek() const -> char {
   if (isAtEnd()) {
     return '\0';
   }
-  return mSource[mCurrent];
+  return mSource.at(mCurrent);
 }
