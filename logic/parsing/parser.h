@@ -25,8 +25,14 @@ public:
       , got(got) {}
   };
 
+  struct ExpectedSentence {
+    SourceLocation location;
+    explicit ExpectedSentence(SourceLocation location) 
+      : location(location) {}
+  };
+
 private:
-  using ValueType = std::variant<ExpectedToken>;
+  using ValueType = std::variant<ExpectedToken, ExpectedSentence>;
   ValueType value;
 
 public:
@@ -62,6 +68,7 @@ private:
   auto parseBinaryRHS(int, Sentence) -> std::expected<Sentence, ParserError>;
   auto parsePrimary() -> std::expected<Sentence, ParserError>;
 
+  constexpr auto getCurrentLocation() const -> SourceLocation;
   constexpr auto advance() -> const Token&;
 
   constexpr auto match(TokenType) -> bool;

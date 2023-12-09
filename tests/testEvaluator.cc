@@ -9,6 +9,7 @@
 #include "logic/parsing/parser.h"
 #include "logic/utils/macros.h"
 #include "logic/utils/overloaded.h"
+#include "tests/reporter.h"
 
 using namespace logic;
 
@@ -19,35 +20,21 @@ auto verifyResult(std::string_view source, Value expectedValue) {
   auto tokens = scanner.scan();
 
   if (not tokens.has_value()) {
-    FAIL() << tokens.error().accept(overloaded {
-        [](const ScannerError::UnexpectedKeyword &e) {
-          return std::format("Unexpected keyword `{}`", e.keyword);
-        },
-        [](const ScannerError::InvalidVariableName &e) {
-          return std::format("Invalid Variable name`{}`", e.name);
-        },
-        [](const ScannerError::UnexpectedCharacter &e) {
-          return std::format("Unexpected character `{}`", e.character);
-        }}
-      );
+    FAIL() << report(tokens.error());
   }
 
   auto parser = Parser(std::move(*tokens));
   auto sentences = parser.parse();
 
   if (not sentences.has_value()) {
-    FAIL() << sentences.error().accept(overloaded {
-      [](const ParserError::ExpectedToken& e) {
-        return std::format("Unexpected token {}, expected {}", e.got.lexeme, tokenTypeToString(e.expected));
-      }
-    });
+    FAIL() << report(sentences.error());
   }
 
   auto evaluator = Evaluator();
   auto value = evaluator.evaluate(sentences->at(0));
 
   if (not value.has_value()) {
-    FAIL();
+    FAIL() << report(value.error());
   }
 
   EXPECT_EQ(*value, expectedValue);

@@ -47,6 +47,7 @@ test_sources = [
   'tests/testEnvironment.cc',
 
   'tests/printer.cc',
+  'tests/reporter.cc',
 ]
 
 test_runner = executable(

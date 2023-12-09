@@ -17,6 +17,11 @@ auto Parser::parseSentence() -> std::expected<Sentence, ParserError> {
   return parseCompoundSentence();
 }
 
+auto Parser::parseCompoundSentence() -> std::expected<Sentence, ParserError> {
+  auto lhs = TRY(parsePrimary());
+  return parseBinaryRHS(0, std::move(lhs));
+}
+
 // FIXME: this crashes when input is '('
 auto Parser::parseGroupedSentence() -> std::expected<Sentence, ParserError> {
   auto sentence = TRY(parseSentence());
@@ -28,10 +33,6 @@ auto Parser::parseGroupedSentence() -> std::expected<Sentence, ParserError> {
   return Sentence::Grouped(std::move(sentence));
 }
 
-auto Parser::parseCompoundSentence() -> std::expected<Sentence, ParserError> {
-  auto lhs = TRY(parsePrimary());
-  return parseBinaryRHS(0, std::move(lhs));
-}
 
 auto Parser::parsePrimary() -> std::expected<Sentence, ParserError> {
   if (match(TokenType::LeftParen)) {
@@ -96,9 +97,12 @@ auto Parser::parseAtomicSentence() -> std::expected<Sentence, ParserError> {
     return Sentence::Variable(peekPrevious());
   }
 
-  std::unreachable();
+  return std::unexpected(ParserError::ExpectedSentence(getCurrentLocation()));
 }
 
+constexpr auto Parser::getCurrentLocation() const -> SourceLocation {
+  return peek().location;
+}
 
 constexpr auto Parser::isAtEnd() const -> bool {
   return mCurrent >= mTokens.size() or mTokens.at(mCurrent).type == TokenType::EndOfFile;

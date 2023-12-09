@@ -11,9 +11,9 @@
 
 #include <tests/printer.h>
 
+#include "reporter.h"
+
 using namespace logic;
-
-
 
 TEST(Scanner, TestKeywords) {
 
@@ -21,17 +21,7 @@ TEST(Scanner, TestKeywords) {
   auto tokens = scanner.scan();
 
   if (not tokens.has_value()) {
-    FAIL() << tokens.error().accept(overloaded {
-        [](const ScannerError::UnexpectedKeyword &e) {
-          return std::format("Unexpected keyword `{}`", e.keyword);
-        },
-        [](const ScannerError::InvalidVariableName &e) {
-          return std::format("Invalid Variable name`{}`", e.name);
-        },
-        [](const ScannerError::UnexpectedCharacter &e) {
-          return std::format("Unexpected character `{}`", e.character);
-        }}
-      );
+    FAIL() << report(tokens.error());
   }
 
   auto expectedTokens = std::initializer_list<TokenType> {
@@ -62,17 +52,7 @@ TEST(Scanner, TestSkipComments) {
   auto tokens = scanner.scan();
 
   if (not tokens.has_value()) {
-    FAIL() << tokens.error().accept(overloaded {
-        [](const ScannerError::UnexpectedKeyword &e) {
-          return std::format("Unexpected keyword `{}`", e.keyword);
-        },
-        [](const ScannerError::InvalidVariableName &e) {
-          return std::format("Invalid Variable name`{}`", e.name);
-        },
-        [](const ScannerError::UnexpectedCharacter &e) {
-          return std::format("Unexpected character `{}`", e.character);
-        }}
-      );
+    FAIL() << report(tokens.error());
   }
 
   auto expectedTokens = std::initializer_list<TokenType> {

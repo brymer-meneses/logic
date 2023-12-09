@@ -77,6 +77,9 @@ auto Logic::report(const ParserError& e, std::string_view source) -> void {
   auto message = e.accept(overloaded {
     [](const ParserError::ExpectedToken& e) {
       return std::format("Unexpected token {}, expected {}", e.got.lexeme, tokenTypeToString(e.expected));
+    },
+    [](const ParserError::ExpectedSentence& e) {
+      return std::format("Expected sentence about here.");
     }
   });
   reportInternal(message, location, source);
