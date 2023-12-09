@@ -1,5 +1,6 @@
 
 #include "logic/logic.h"
+#include "evaluation/environment.h"
 #include "logic/parsing/parser.h"
 #include "logic/utils/overloaded.h"
 #include "logic/utils/color.h"
@@ -13,7 +14,7 @@
 using namespace logic;
 
 
-auto Logic::run(std::string_view source) -> void {
+auto Logic::run(std::string_view source, Environment& environment) -> void {
   auto scanner = Scanner(source, "REPL");
   auto tokens = scanner.scan();
 
@@ -31,7 +32,7 @@ auto Logic::run(std::string_view source) -> void {
   }
 
   for (const auto& sentence : *sentences) {
-    auto evaluator = Evaluator();
+    auto evaluator = Evaluator(environment);
     auto value = evaluator.evaluate(sentence);
     if (not value.has_value()) {
       Logic::report(value.error(), source);
@@ -43,6 +44,8 @@ auto Logic::run(std::string_view source) -> void {
 }
 
 auto Logic::runREPL() -> void {
+
+  Environment environment;
   while (true) {
     std::string source;
     std::print(">>> ");
@@ -50,7 +53,7 @@ auto Logic::runREPL() -> void {
     // Break the loop on EOF or other error
     if (not std::getline(std::cin, source)) { break; }
 
-    run(source);
+    run(source, environment);
   }
 }
 
@@ -69,7 +72,9 @@ auto Logic::runFile(std::string_view filename) -> void {
       source << line << "\n";
     }
   }
-  run(source.str());
+
+  Environment environment;
+  run(source.str(), environment);
 }
 
 auto Logic::report(const ParserError& e, std::string_view source) -> void {

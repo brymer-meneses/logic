@@ -44,14 +44,14 @@ public:
 class Evaluator {
 
 private:
-  Environment mEnvironment;
+  Environment& mEnvironment;
   mutable Table mTable;
 
 private:
-  auto initializeEnvironment(const Sentence&) -> void;
+  auto initializeVariables(const Sentence&) -> std::expected<bool, EvaluatorError>;
   auto internalEvaluate(const Sentence&) const -> std::expected<Value, EvaluatorError>;
 
-  auto recordSentenceEvaluation(const Sentence&, const Value&) const -> void;
+  auto recordEvaluation(const Sentence&, const Value&) const -> void;
   auto recordEnvironment() const -> void;
 
   auto negation(Value) const -> Value;
@@ -61,6 +61,9 @@ private:
   auto bijection(Value, Value) const -> Value;
 
 public:
+  constexpr Evaluator(Environment& env) : mEnvironment(env) {
+    env.resetDefaultValues();
+  }
   auto evaluate(const Sentence&) -> std::expected<Value, EvaluatorError>;
 
   auto printEvaluation() -> void;

@@ -39,7 +39,7 @@ auto Evaluator::negation(Value v) const -> Value {
 }
 
 auto Evaluator::evaluate(const Sentence& sentence) -> std::expected<Value, EvaluatorError> {
-  initializeEnvironment(sentence);
+  TRY(initializeVariables(sentence));
   recordEnvironment();
   return internalEvaluate(sentence);
 }
@@ -47,8 +47,10 @@ auto Evaluator::evaluate(const Sentence& sentence) -> std::expected<Value, Evalu
 auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expected<Value, EvaluatorError> {
   return sentence.accept(
     overloaded {
-      [this](const Sentence::Variable& s) -> std::expected<Value, EvaluatorError> {
-        return mEnvironment.read(s.identifier.lexeme);
+      [this, &sentence](const Sentence::Variable& s) -> std::expected<Value, EvaluatorError> {
+        auto value = mEnvironment.read(s.identifier.lexeme); 
+        recordEvaluation(sentence, value);
+        return value;
       },
       [this](const Sentence::Value& s) -> std::expected<Value, EvaluatorError> {
         ASSERT(s.value.type == TokenType::True or s.value.type == TokenType::False);
@@ -60,7 +62,7 @@ auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expecte
       [this, &sentence](const Sentence::Negated& s) -> std::expected<Value, EvaluatorError> {
         const auto rhs = TRY(internalEvaluate(*s.sentence));
         const auto result = negation(rhs);
-        recordSentenceEvaluation(sentence, result);
+        recordEvaluation(sentence, result);
         return result;
       },
       [this, &sentence](const Sentence::Compound& s) -> std::expected<Value, EvaluatorError> {
@@ -93,32 +95,51 @@ auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expecte
             std::unreachable();
         }
 
-        recordSentenceEvaluation(*s.left, lhs);
-        recordSentenceEvaluation(*s.right, rhs);
-        recordSentenceEvaluation(sentence, result);
+        recordEvaluation(*s.left, lhs);
+        recordEvaluation(*s.right, rhs);
+        recordEvaluation(sentence, result);
         return result;
       },
     }
   );
 }
 
-auto Evaluator::initializeEnvironment(const Sentence& sentence) -> void {
-  sentence.accept(overloaded {
-    [&](const Sentence::Variable& s){ 
-      mEnvironment.define(s.identifier.lexeme);
+auto Evaluator::initializeVariables(const Sentence& sentence) -> std::expected<bool, EvaluatorError>{
+  return sentence.accept(overloaded {
+    [&](const Sentence::Variable& s) -> std::expected<bool, EvaluatorError> { 
+      if (not mEnvironment.isVariableAssigned(s.identifier.lexeme)) {
+        mEnvironment.define(s.identifier.lexeme);
+      }
+      return true;
     },
-    [this](const Sentence::Grouped& s) { 
-      initializeEnvironment(*s.sentence);
+    [this](const Sentence::Grouped& s) -> std::expected<bool, EvaluatorError> { 
+      initializeVariables(*s.sentence);
+      return true;
     },
-    [this](const Sentence::Negated& s) { 
-      initializeEnvironment(*s.sentence);
+    [this](const Sentence::Negated& s) -> std::expected<bool, EvaluatorError> {
+      initializeVariables(*s.sentence);
+      return true;
     },
-    [this](const Sentence::Compound& s) { 
-      if (s.connective.type == TokenType::Equal) return;
-      initializeEnvironment(*s.left);
-      initializeEnvironment(*s.right);
+    [this, &sentence](const Sentence::Compound& s) -> std::expected<bool, EvaluatorError> {  
+      if (s.connective.type == TokenType::Equal) { 
+        const auto isValidAssignment = s.left->is<Sentence::Variable>() and s.right->is<Sentence::Value>();
+        if (not isValidAssignment) {
+          return std::unexpected(EvaluatorError::InvalidAssignment(sentence.location()));
+        }
+
+        auto variableName = s.left->unsafeAs<Sentence::Variable>().identifier.lexeme;
+        auto value = s.right->unsafeAs<Sentence::Value>().value.type == TokenType::True;
+        mEnvironment.assign(variableName, value);
+        return true;
+      }
+
+      initializeVariables(*s.left);
+      initializeVariables(*s.right);
+      return true;
     },
-    [](const Sentence::Value& s) {},
+    [](const Sentence::Value& s) -> std::expected<bool, EvaluatorError> {  
+      return true;
+    },
   });
 }
 
@@ -126,8 +147,13 @@ auto Evaluator::printEvaluation() -> void {
   mTable.print();
 }
 
-auto Evaluator::recordSentenceEvaluation(const Sentence& sentence, const Value& result) const -> void {
-  if (sentence.is<Sentence::Variable>()) return;
+auto Evaluator::recordEvaluation(const Sentence& sentence, const Value& result) const -> void {
+  if (sentence.is<Sentence::Variable>()) {
+    // skip recording variables if they have "default" values, as this will be recorded by `recordEnvironment`.
+    const auto isVariableAssigned = mEnvironment.isVariableAssigned(sentence.unsafeAs<Sentence::Variable>().identifier.lexeme);
+    if (not isVariableAssigned) return; 
+  }
+
   if (sentence.is<Sentence::Value>()) return;
   if (sentence.is<Sentence::Grouped>()) return;
 
@@ -145,7 +171,7 @@ auto Evaluator::recordSentenceEvaluation(const Sentence& sentence, const Value& 
 }
 
 auto Evaluator::recordEnvironment() const -> void {
-  for (const auto& variable : mEnvironment.variables()) {
+  for (const auto& variable : mEnvironment.definedVariables()) {
     Column column(variable.size() + 1);
     column.add(variable);
     for (const auto& boolean : mEnvironment.read(variable)) {

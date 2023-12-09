@@ -1,6 +1,5 @@
 #include "logic/evaluation/environment.h"
 #include "logic/utils/macros.h"
-#include <print>
 
 using namespace logic;
 
@@ -11,21 +10,17 @@ auto Environment::define(std::string_view variableName) -> bool {
   }
 
   mVariables.insert(variableName);
-
-  mData.clear();
-  mData.reserve(1 << mVariables.size());
-
-  for (auto i = (1 << mVariables.size()) - 1; i >= 0; i--) {
-    mData.push_back(i);
-  }
-
+  initializeDefaultValues();
   return true;
 }
 
 auto Environment::read(std::string_view variableName) const -> std::vector<bool> {
-  ASSERT(mVariables.contains(variableName),
-         "INTERNAL ERROR: Tried to read variable `{}` is not defined",
-         variableName);
+  auto variableNameStr = std::string(variableName);
+  if (mAssignedVariables.contains(variableNameStr)) {
+    return createBoolean(mAssignedVariables.at(variableNameStr));
+  }
+
+  ASSERT(mVariables.contains(variableName));
 
   auto result = std::vector<bool> {};
 
@@ -41,3 +36,25 @@ auto Environment::read(std::string_view variableName) const -> std::vector<bool>
 
   return result;
 }
+
+auto Environment::assign(std::string_view variableName, bool value) -> void {
+  if (mVariables.contains(variableName)) {
+    mVariables.erase(variableName);
+    initializeDefaultValues();
+  }
+
+  mAssignedVariables.insert({std::string(variableName), value});
+}
+
+auto Environment::initializeDefaultValues() -> void {
+  mData.clear();
+
+  for (auto i = (1 << mVariables.size()) - 1; i >= 0; i--) {
+    mData.push_back(i);
+  }
+}
+
+auto Environment::resetDefaultValues() -> void {
+  mData.clear();
+}
+

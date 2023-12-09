@@ -36,5 +36,8 @@ auto Table::printSeparationLine() const -> void {
     auto str = std::vformat(formatStr, std::make_format_args(""));
     std::print("{}", Color::Gray(str));
   }
-  std::println("{}", Color::Gray("+"));
+
+  if (mColumns.size() != 0) {
+    std::println("{}", Color::Gray("+"));
+  }
 }

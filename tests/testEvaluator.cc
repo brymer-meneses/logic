@@ -30,7 +30,8 @@ auto verifyResult(std::string_view source, Value expectedValue) {
     FAIL() << report(sentences.error());
   }
 
-  auto evaluator = Evaluator();
+  auto environment = Environment();
+  auto evaluator = Evaluator(environment);
   auto value = evaluator.evaluate(sentences->at(0));
 
   if (not value.has_value()) {

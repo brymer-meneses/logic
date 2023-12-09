@@ -76,6 +76,11 @@ public:
     return std::holds_alternative<T>(value);
   }
 
+  template <typename T>
+  constexpr auto unsafeAs() const -> T {
+    return std::get<T>(value);
+  }
+
   friend constexpr auto operator==(const Sentence&, const Sentence&) -> bool = default;
   static auto asString(const Sentence& s) -> std::string;
 

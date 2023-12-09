@@ -12,7 +12,7 @@ public:
   static auto runREPL() -> void;
 
 private:
-  static auto run(std::string_view source) -> void;
+  static auto run(std::string_view source, Environment& env) -> void;
   static auto report(const EvaluatorError&, std::string_view) -> void;
   static auto report(const ScannerError&, std::string_view) -> void;
   static auto report(const ParserError&, std::string_view) -> void;

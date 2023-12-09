@@ -34,10 +34,9 @@ public:
       : type(type), contents(contents) {}
 
 #define DEFINE_COLOR(color)                                                    \
-  template <Printable T> static constexpr auto color(T content)->Color {       \
-    if constexpr (std::is_same_v<std::string, T> or                            \
-                  std::is_same_v<std::string_view, T> or                       \
-                  std::is_same_v<const char *, T>) {                           \
+  template <Printable T>                                                       \
+  static constexpr auto color(T content) -> Color {                            \
+    if constexpr (requires { std::string(content); }) {                        \
       return Color(content, ColorType::color);                                 \
     } else {                                                                   \
       return Color(std::to_string(content), ColorType::color);                 \
