@@ -1,6 +1,7 @@
 #pragma once
 
 #include "logic/parsing/token.h"
+#include "logic/parsing/sourceLocation.h"
 
 #include <memory>
 #include <variant>
@@ -76,7 +77,9 @@ public:
   }
 
   friend constexpr auto operator==(const Sentence&, const Sentence&) -> bool = default;
-  friend auto sentenceAsString(const Sentence& s) -> std::string;
+  static auto asString(const Sentence& s) -> std::string;
+
+  auto location() const -> SourceLocation;
 
 private:
   ValueType value;

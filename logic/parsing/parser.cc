@@ -22,14 +22,11 @@ auto Parser::parseCompoundSentence() -> std::expected<Sentence, ParserError> {
   return parseBinaryRHS(0, std::move(lhs));
 }
 
-// FIXME: this crashes when input is '('
 auto Parser::parseGroupedSentence() -> std::expected<Sentence, ParserError> {
   auto sentence = TRY(parseSentence());
-
   if (not match(TokenType::RightParen)) {
-    return std::unexpected(ParserError::ExpectedToken(TokenType::RightParen, peek()));
+    return std::unexpected(ParserError::UnexpectedToken(TokenType::RightParen, peek(), getCurrentLocation()));
   }
-
   return Sentence::Grouped(std::move(sentence));
 }
 
@@ -48,14 +45,16 @@ auto Parser::parsePrimary() -> std::expected<Sentence, ParserError> {
 auto Parser::parseBinaryRHS(int prevPrec, Sentence lhs) -> std::expected<Sentence, ParserError> {
   constexpr static auto getTokenPrecedence = [](TokenType type) -> int {
     switch (type) {
-      case TokenType::Equivalent:
+      case TokenType::Equal:
         return 10;
-      case TokenType::Implies:
+      case TokenType::Equivalent:
         return 20;
-      case TokenType::Or:
+      case TokenType::Implies:
         return 30;
-      case TokenType::And:
+      case TokenType::Or:
         return 40;
+      case TokenType::And:
+        return 50;
       default:
         return -1;
     }
@@ -141,6 +140,15 @@ constexpr auto Parser::match(std::initializer_list<TokenType> types) -> bool {
   }
 
   return false;
+}
+
+constexpr auto Parser::check(TokenType type) const -> bool {
+  return peek().type == type;
+}
+
+constexpr auto Parser::checkNext(TokenType type) const -> bool {
+  if (isAtEnd()) return false;
+  return mTokens[mCurrent + 1].type == type;
 }
 
 constexpr auto Parser::advance() -> const Token& {

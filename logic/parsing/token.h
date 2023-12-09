@@ -18,6 +18,7 @@ enum class TokenType {
   Or,
   Implies,
   Equivalent,
+  Equal,
   EndOfFile,
 };
 
@@ -57,6 +58,8 @@ constexpr auto tokenTypeToString(TokenType type) -> std::string_view {
       return "=>";
     case TokenType::Equivalent:
       return "<=>";
+    case TokenType::Equal:
+      return "=";
     case TokenType::EndOfFile:
       return "EOF";
   }

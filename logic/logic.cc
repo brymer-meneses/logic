@@ -74,14 +74,14 @@ auto Logic::runFile(std::string_view filename) -> void {
 
 auto Logic::report(const ParserError& e, std::string_view source) -> void {
   auto location = e.accept([](auto& error){return error.location;}) ;
-  auto message = e.accept(overloaded {
-    [](const ParserError::ExpectedToken& e) {
-      return std::format("Unexpected token {}, expected {}", e.got.lexeme, tokenTypeToString(e.expected));
-    },
-    [](const ParserError::ExpectedSentence& e) {
-      return std::format("Expected sentence about here.");
-    }
-  });
+  auto message = e.accept(overloaded{
+      [](const ParserError::UnexpectedToken &e) {
+        return std::format("Unexpected token {}, expected {}", e.got.lexeme,
+                           tokenTypeToString(e.expected));
+      },
+      [](const ParserError::ExpectedSentence &e) {
+        return std::format("Expected sentence about here.");
+      }});
   reportInternal(message, location, source);
 }
 
@@ -102,8 +102,18 @@ auto Logic::report(const ScannerError& e, std::string_view source) -> void {
   reportInternal(message, location, source);
 }
 
-auto Logic::report(const EvaluatorError& e, std::string_view) -> void {
-
+auto Logic::report(const EvaluatorError& e, std::string_view source) -> void {
+  auto location = e.accept([](auto& error){return error.location;}) ;
+  auto message = e.accept(overloaded{
+      [](const EvaluatorError::MaximumVariablesAchieved &e) -> std::string {
+        return "Maximum variables reached";
+      },
+      [](const EvaluatorError::InvalidAssignment &e) -> std::string {
+        return "Invalid assignment. Ensure that the left-hand side is a "
+               "variable and the right-hand side is either TRUE or FALSE.";
+      },
+  });
+  reportInternal(message, location, source);
 }
 
 
@@ -127,7 +137,7 @@ auto Logic::reportInternal(std::string_view message, SourceLocation location, st
   };
 
   if (location.filename != "REPL")  {
-    std::println("{}:{}:{}", location.filename, location.line, location.start);
+    std::println(stderr, "{}:{}:{}", location.filename, location.line, location.start);
   }
 
   auto locationLength = std::to_string(location.line).length();

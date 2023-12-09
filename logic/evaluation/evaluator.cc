@@ -64,6 +64,14 @@ auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expecte
         return result;
       },
       [this, &sentence](const Sentence::Compound& s) -> std::expected<Value, EvaluatorError> {
+        if (s.connective.type == TokenType::Equal) { 
+          const auto isValidAssignment = s.left->is<Sentence::Variable>() and s.right->is<Sentence::Value>();
+          if (isValidAssignment) {
+            return internalEvaluate(*s.right);
+          }
+          return std::unexpected(EvaluatorError::InvalidAssignment(sentence.location()));
+        }
+
         const auto lhs = TRY(internalEvaluate(*s.left));
         const auto rhs = TRY(internalEvaluate(*s.right));
 
@@ -106,6 +114,7 @@ auto Evaluator::initializeEnvironment(const Sentence& sentence) -> void {
       initializeEnvironment(*s.sentence);
     },
     [this](const Sentence::Compound& s) { 
+      if (s.connective.type == TokenType::Equal) return;
       initializeEnvironment(*s.left);
       initializeEnvironment(*s.right);
     },
@@ -122,7 +131,7 @@ auto Evaluator::recordSentenceEvaluation(const Sentence& sentence, const Value& 
   if (sentence.is<Sentence::Value>()) return;
   if (sentence.is<Sentence::Grouped>()) return;
 
-  auto stringRep = sentenceAsString(sentence);
+  auto stringRep = Sentence::asString(sentence);
   for (const auto& column : mTable.columns()) {
     if (column[0] == stringRep) { return; }
   }

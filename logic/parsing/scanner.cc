@@ -29,6 +29,9 @@ auto Scanner::scanToken() -> std::expected<void, ScannerError> {
         advance();
       };
       break;
+    case '=':
+      addToken(TokenType::Equal);
+      break;
     case '(':
       addToken(TokenType::LeftParen);
       break;

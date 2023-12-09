@@ -13,16 +13,15 @@ namespace logic {
 class ParserError {
 
 public:
-  struct ExpectedToken {
+  struct UnexpectedToken {
     TokenType expected;
     Token got;
+    SourceLocation location;
 
-    // FIXME: this should be passed to the constructor
-    SourceLocation location{0, 0, 0, "DUMMY"};
-
-    explicit ExpectedToken(TokenType expected, Token got) 
+    explicit UnexpectedToken(TokenType expected, Token got, SourceLocation location) 
       : expected(expected)
-      , got(got) {}
+      , got(got) 
+      , location(location) {}
   };
 
   struct ExpectedSentence {
@@ -32,7 +31,7 @@ public:
   };
 
 private:
-  using ValueType = std::variant<ExpectedToken, ExpectedSentence>;
+  using ValueType = std::variant<UnexpectedToken, ExpectedSentence>;
   ValueType value;
 
 public:
@@ -58,6 +57,7 @@ public:
 
 private:
   auto parseSentence() -> std::expected<Sentence, ParserError>;
+  auto parseAssignmentSentence() -> std::expected<Sentence, ParserError>;
 
   auto parseGroupedSentence() -> std::expected<Sentence, ParserError>;
 
@@ -78,6 +78,7 @@ private:
   constexpr auto peekPrevious() const -> const Token&;
 
   constexpr auto check(TokenType) const -> bool;
+  constexpr auto checkNext(TokenType) const -> bool;
   constexpr auto isAtEnd() const -> bool;
 
 

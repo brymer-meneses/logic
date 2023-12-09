@@ -57,15 +57,16 @@ public:
 
 } // namespace logic
 
-template <> struct std::formatter<logic::Color> {
+template <> 
+struct std::formatter<logic::Color> {
 
-  template <typename ParseContext> constexpr auto parse(ParseContext &ctx) {
+  template <typename ParseContext> 
+  constexpr auto parse(ParseContext &ctx) {
     return ctx.begin();
   }
 
   template <typename FormatContext>
   constexpr auto format(const logic::Color &c, FormatContext &ctx) const {
-    return std::format_to(ctx.out(), "\e[0;{}m{}\e[0m", int(c.type),
-                          c.contents);
+    return std::format_to(ctx.out(), "\e[0;{}m{}\e[0m", int(c.type), c.contents);
   }
 };

@@ -17,18 +17,18 @@ namespace logic {
 class EvaluatorError {
 
 public:
-  struct InvalidVariableName {
-    Token variable;
-    explicit InvalidVariableName(Token variable) : variable(variable) {}
-  };
-
   struct MaximumVariablesAchieved {
     SourceLocation location;
     explicit MaximumVariablesAchieved(SourceLocation location) : location(location) {}
   };
 
+  struct InvalidAssignment {
+    SourceLocation location;
+    explicit InvalidAssignment(SourceLocation location) : location(location) {}
+  };
+
 private:
-  using ValueType = std::variant<InvalidVariableName>;
+  using ValueType = std::variant<MaximumVariablesAchieved, InvalidAssignment>;
   ValueType value;
 
 public:
@@ -36,7 +36,7 @@ public:
   requires std::is_constructible_v<ValueType, T>
   constexpr EvaluatorError(T value) : value(value) {}
 
-  constexpr auto accept(auto visitor) -> decltype(auto) {
+  constexpr auto accept(auto visitor) const -> decltype(auto) {
     return std::visit(visitor, value);
   } 
 };

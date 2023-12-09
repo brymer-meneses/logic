@@ -6,7 +6,7 @@
 #include "printer.h"
 
 auto logic::operator<<(std::ostream& stream, const Sentence& sentence) -> std::ostream& {
-  return stream << sentenceAsString(sentence);
+  return stream << Sentence::asString(sentence);
 }
 
 auto logic::operator<<(std::ostream& stream, const Value& value) -> std::ostream& {
