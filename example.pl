@@ -1,4 +1,0 @@
-
-P AND Q AND C AND D
-
-P = Q
