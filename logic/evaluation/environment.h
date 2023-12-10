@@ -11,7 +11,7 @@ namespace logic {
 class Environment {
 
 public:
-  static constexpr auto MAX_VARIABLES = 16;
+  static constexpr auto MAX_VARIABLES = 26;
 
 private:
   std::vector<std::bitset<MAX_VARIABLES>> mData;

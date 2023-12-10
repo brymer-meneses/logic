@@ -45,27 +45,28 @@ auto Evaluator::evaluate(const Sentence& sentence) -> std::expected<Value, Evalu
 }
 
 auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expected<Value, EvaluatorError> {
+  using Result = std::expected<Value, EvaluatorError>;
   return sentence.accept(
     overloaded {
-      [this, &sentence](const Sentence::Variable& s) -> std::expected<Value, EvaluatorError> {
+      [this, &sentence](const Sentence::Variable& s) -> Result {
         auto value = mEnvironment.read(s.identifier.lexeme); 
         recordEvaluation(sentence, value);
         return value;
       },
-      [this](const Sentence::Value& s) -> std::expected<Value, EvaluatorError> {
+      [this](const Sentence::Value& s) -> Result {
         ASSERT(s.value.type == TokenType::True or s.value.type == TokenType::False);
         return mEnvironment.createBoolean(s.value.type == TokenType::True);
       },
-      [this](const Sentence::Grouped& s) -> std::expected<Value, EvaluatorError> {
+      [this](const Sentence::Grouped& s) -> Result {
         return internalEvaluate(*s.sentence);
       },
-      [this, &sentence](const Sentence::Negated& s) -> std::expected<Value, EvaluatorError> {
+      [this, &sentence](const Sentence::Negated& s) -> Result {
         const auto rhs = TRY(internalEvaluate(*s.sentence));
         const auto result = negation(rhs);
         recordEvaluation(sentence, result);
         return result;
       },
-      [this, &sentence](const Sentence::Compound& s) -> std::expected<Value, EvaluatorError> {
+      [this, &sentence](const Sentence::Compound& s) -> Result {
         if (s.connective.type == TokenType::Equal) { 
           const auto isValidAssignment = s.left->is<Sentence::Variable>() and s.right->is<Sentence::Value>();
           if (isValidAssignment) {

@@ -43,7 +43,7 @@ auto Environment::assign(std::string_view variableName, bool value) -> void {
     initializeDefaultValues();
   }
 
-  mAssignedVariables.insert({std::string(variableName), value});
+  mAssignedVariables[std::string(variableName)] = value;
 }
 
 auto Environment::initializeDefaultValues() -> void {
