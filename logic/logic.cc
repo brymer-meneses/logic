@@ -50,7 +50,6 @@ auto Logic::runREPL() -> void {
     std::string source;
     std::print(">>> ");
     
-    // Break the loop on EOF or other error
     if (not std::getline(std::cin, source)) { break; }
 
     run(source, environment);

@@ -56,5 +56,6 @@ auto Environment::initializeDefaultValues() -> void {
 
 auto Environment::resetDefaultValues() -> void {
   mData.clear();
+  mVariables.clear();
 }
 

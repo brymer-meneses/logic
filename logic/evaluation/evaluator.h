@@ -61,7 +61,7 @@ private:
   auto bijection(Value, Value) const -> Value;
 
 public:
-  constexpr Evaluator(Environment& env) : mEnvironment(env) {
+  Evaluator(Environment& env) : mEnvironment(env) {
     env.resetDefaultValues();
   }
   auto evaluate(const Sentence&) -> std::expected<Value, EvaluatorError>;
