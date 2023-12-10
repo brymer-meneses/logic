@@ -68,11 +68,10 @@ auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expecte
       },
       [this, &sentence](const Sentence::Compound& s) -> Result {
         if (s.connective.type == TokenType::Equal) { 
-          const auto isValidAssignment = s.left->is<Sentence::Variable>() and s.right->is<Sentence::Value>();
-          if (isValidAssignment) {
-            return internalEvaluate(*s.right);
-          }
-          return std::unexpected(EvaluatorError::InvalidAssignment(sentence.location()));
+          // NOTE:
+          //    we can already be sure that this is a valid assignment since that is checked 
+          //    before-hand by 'recordEvaluation'
+          return internalEvaluate(*s.right);
         }
 
         const auto lhs = TRY(internalEvaluate(*s.left));
