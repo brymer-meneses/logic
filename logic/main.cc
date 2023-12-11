@@ -12,6 +12,6 @@ auto main(int argc, const char** argv) -> int {
   } else if (argc == 2) {
     Logic::runFile(argv[1]);
   } else {
-    std::println(stderr, "Usage: logic <source>");
+    std::println(stderr, "{}: usage {}", Color::Blue("Logic"), Color::Yellow("<source>"));
   }
 }

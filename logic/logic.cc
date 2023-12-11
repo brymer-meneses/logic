@@ -63,7 +63,7 @@ auto Logic::runFile(std::string_view filename) -> void {
   std::stringstream source;
 
   if (file.fail()) {
-    std::println(stderr, "LOGIC: File `{}` does not exist", filename);
+    std::println(stderr, "{}: File `{}` does not exist", Color::Blue("LOGIC"), Color::Yellow(filename));
     exit(1);
   }
 
@@ -115,7 +115,7 @@ auto Logic::report(const EvaluatorError& e, std::string_view source) -> void {
   auto location = e.accept([](auto& error){return error.location;}) ;
   auto message = e.accept(overloaded{
       [](const EvaluatorError::MaximumVariablesAchieved &e) -> std::string {
-        return "Maximum variables reached";
+        return std::format("Maximum variables reached, this program only supports up to {} variables.", Environment::MAX_VARIABLES);
       },
       [](const EvaluatorError::InvalidAssignment &e) -> std::string {
         return "Invalid assignment. Ensure that the left-hand side is a "

@@ -66,6 +66,6 @@ struct std::formatter<logic::Color> {
 
   template <typename FormatContext>
   constexpr auto format(const logic::Color &c, FormatContext &ctx) const {
-    return std::format_to(ctx.out(), "\e[0;{}m{}\e[0m", int(c.type), c.contents);
+    return std::format_to(ctx.out(), "\x1B[0;{}m{}\x1B[0m", int(c.type), c.contents);
   }
 };

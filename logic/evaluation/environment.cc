@@ -5,7 +5,7 @@ using namespace logic;
 
 auto Environment::define(std::string_view variableName) -> bool {
   if (mVariables.contains(variableName)) return true;
-  if (mVariables.size() + 1 > MAX_VARIABLES) {
+  if (mVariables.size() >= MAX_VARIABLES) {
     return false;
   }
 

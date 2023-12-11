@@ -71,7 +71,7 @@ auto Parser::parseBinaryRHS(int prevPrec, Sentence lhs) -> std::expected<Sentenc
 
     auto nextPrec = getTokenPrecedence(peek().type);
     if (tokenPrec <= nextPrec) {
-      // NOTE: We prefer right associativity so we make the 'tokenPrec' which is the
+      // NOTE: We prefer right associativity so we subtract 1 to the 'tokenPrec' which is the
       //       current operator precedence, and prefer the other precedence.
       //       This is needed since '=>' and '<=>' are right associative.
       rhs = TRY(parseBinaryRHS(tokenPrec-1, std::move(rhs)));

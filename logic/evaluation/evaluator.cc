@@ -107,19 +107,20 @@ auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expecte
 auto Evaluator::initializeVariables(const Sentence& sentence) -> std::expected<bool, EvaluatorError>{
   using Result = std::expected<bool, EvaluatorError>;
   return sentence.accept(overloaded {
-    [&](const Sentence::Variable& s) -> Result { 
-      if (not mEnvironment.isVariableAssigned(s.identifier.lexeme)) {
-        mEnvironment.define(s.identifier.lexeme);
+    [this, &sentence](const Sentence::Variable& s) -> Result { 
+      if (mEnvironment.isVariableAssigned(s.identifier.lexeme)) {
+        return true;
+      }
+      if (not mEnvironment.define(s.identifier.lexeme)) {
+        return std::unexpected(EvaluatorError::MaximumVariablesAchieved(sentence.location()));
       }
       return true;
     },
     [this](const Sentence::Grouped& s) -> Result { 
-      initializeVariables(*s.sentence);
-      return true;
+      return initializeVariables(*s.sentence);
     },
     [this](const Sentence::Negated& s) -> Result {
-      initializeVariables(*s.sentence);
-      return true;
+      return initializeVariables(*s.sentence);
     },
     [this, &sentence](const Sentence::Compound& s) -> Result {  
       if (s.connective.type == TokenType::Equal) { 
@@ -134,8 +135,8 @@ auto Evaluator::initializeVariables(const Sentence& sentence) -> std::expected<b
         return true;
       }
 
-      initializeVariables(*s.left);
-      initializeVariables(*s.right);
+      TRY(initializeVariables(*s.left));
+      TRY(initializeVariables(*s.right));
       return true;
     },
     [](const Sentence::Value& s) -> Result {  
