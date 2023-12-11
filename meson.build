@@ -11,6 +11,7 @@ sources = [
   'logic/logic.cc',
 
   'logic/utils/table.cc',
+  'logic/utils/utils.cc',
 ]
 
 cpp_args = [

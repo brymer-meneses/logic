@@ -20,17 +20,28 @@ public:
 
   struct UnexpectedKeyword {
     std::string_view keyword;
+    std::string_view suggestion;
     SourceLocation location;
-    constexpr UnexpectedKeyword(std::string_view keyword, SourceLocation location) : keyword(keyword), location(location) {}
+
+    constexpr UnexpectedKeyword(std::string_view keyword, std::string_view suggestion, SourceLocation location) 
+      : keyword(keyword), suggestion(suggestion), location(location) {}
   };
+
   struct InvalidVariableName {
     std::string_view name;
     SourceLocation location;
     constexpr InvalidVariableName(std::string_view name, SourceLocation location) : name(name), location(location) {}
   };
 
+  struct InvalidKeywordFormat {
+    std::string_view keyword;
+    SourceLocation location;
+    constexpr InvalidKeywordFormat(std::string_view keyword, SourceLocation location) : keyword(keyword), location(location) {}
+  };
+
+
 private:
-  using ValueType = std::variant<UnexpectedCharacter, UnexpectedKeyword, InvalidVariableName>;
+  using ValueType = std::variant<UnexpectedCharacter, UnexpectedKeyword, InvalidVariableName, InvalidKeywordFormat>;
   ValueType value;
 
 public:

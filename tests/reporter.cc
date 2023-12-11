@@ -12,6 +12,9 @@ auto logic::report(const Error& e) -> std::string {
         [](const ScannerError::InvalidVariableName &e) {
           return std::format("Invalid Variable name`{}`", e.name);
         },
+        [](const ScannerError::InvalidKeywordFormat &e) {
+          return std::format("Invalid Keyword format: `{}` must be capitalized.", e.keyword);
+        },
         [](const ScannerError::UnexpectedCharacter &e) {
           return std::format("Unexpected character `{}`", e.character);
         }}

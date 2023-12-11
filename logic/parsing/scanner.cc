@@ -1,5 +1,8 @@
 #include "logic/parsing/scanner.h"
 #include "logic/utils/macros.h"
+#include "logic/utils/utils.h"
+
+#include <ranges>
 
 using namespace logic;
 
@@ -56,24 +59,40 @@ auto Scanner::addToken(TokenType type) -> void {
 }
 
 auto Scanner::scanKeyword() -> std::expected<void, ScannerError> {
-  static constexpr auto keywordLookup = [](std::string_view lexeme) -> TokenType {
-    if (lexeme == "TRUE" ) {
-      return TokenType::True;
-    } else if (lexeme == "FALSE") {
-      return TokenType::False;
-    } else if (lexeme == "NOT") {
-      return TokenType::Not;
-    } else if (lexeme == "AND") {
-      return TokenType::And;
-    } else if (lexeme == "OR") {
-      return TokenType::Or;
-    } else if (lexeme == "IMPLIES") {
-      return TokenType::Implies;
-    } else if (lexeme == "EQUIVALENT") {
-      return TokenType::Equivalent;
-    } else {
+
+  static constexpr auto keywordLookup = [](std::string_view lexeme, SourceLocation location) 
+    -> std::expected<TokenType, ScannerError> {
+
+    if (lexeme.length() == 1) {
       return TokenType::Variable;
     }
+
+    auto keywords = {"TRUE", "FALSE",   "NOT",       "AND",
+                     "OR",   "IMPLIES", "EQUIVALENT"};
+    auto tokens = {TokenType::True,      TokenType::False, TokenType::Not,
+                   TokenType::And,       TokenType::Or,    TokenType::Implies,
+                   TokenType::Equivalent};
+
+    for (const auto& [keyword, tokenType] : std::views::zip(keywords, tokens)) {
+      if (keyword == lexeme) {
+        return tokenType;
+      }
+    }
+
+    for (const auto& keyword : keywords) {
+      if (stringToUpper(lexeme) == keyword) {
+          return std::unexpected(ScannerError::InvalidKeywordFormat(lexeme, location));
+      }
+    }
+
+    auto suggestion = std::min_element(
+        keywords.begin(), keywords.end(),
+        [&](const std::string_view &a, const std::string_view &b) {
+          return levenshteinDistance(lexeme, a) <
+                 levenshteinDistance(lexeme, b);
+        });
+
+    return std::unexpected(ScannerError::UnexpectedKeyword(lexeme, *suggestion, location));
   };
 
   while (std::isalpha(peek())) {
@@ -81,7 +100,7 @@ auto Scanner::scanKeyword() -> std::expected<void, ScannerError> {
   }
 
   auto lexeme = mSource.substr(mStart, mCurrent - mStart);
-  auto type = keywordLookup(lexeme);
+  auto type = TRY(keywordLookup(lexeme, getCurrentLocation()));
   if (lexeme.length() != 1 and type == TokenType::Variable) {
     return std::unexpected(ScannerError::InvalidVariableName(lexeme, getCurrentLocation()));
   }

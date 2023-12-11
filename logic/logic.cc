@@ -4,7 +4,9 @@
 #include "logic/parsing/parser.h"
 #include "logic/utils/overloaded.h"
 #include "logic/utils/color.h"
+#include "logic/utils/utils.h"
 
+#include <cctype>
 #include <fstream>
 #include <sstream>
 #include <iostream>
@@ -93,7 +95,10 @@ auto Logic::report(const ScannerError& e, std::string_view source) -> void {
   auto location = e.accept([](auto& error){return error.location;}) ;
   auto message = e.accept(overloaded {
     [](const ScannerError::UnexpectedKeyword &e) {
-      return std::format("Unexpected keyword `{}`", e.keyword);
+      return std::format("Unexpected keyword `{}` did you mean `{}`?", e.keyword, e.suggestion);
+    },
+    [](const ScannerError::InvalidKeywordFormat &e) {
+      return std::format("The keyword `{}` is not capitalized correctly. It should be {}", e.keyword, stringToUpper(e.keyword));
     },
     [](const ScannerError::InvalidVariableName &e) {
       return std::format("Invalid variable name `{}`. Variables must have length 1", e.name);
