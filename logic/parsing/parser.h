@@ -77,8 +77,6 @@ private:
   constexpr auto peek() const -> const Token&;
   constexpr auto peekPrevious() const -> const Token&;
 
-  constexpr auto check(TokenType) const -> bool;
-  constexpr auto checkNext(TokenType) const -> bool;
   constexpr auto isAtEnd() const -> bool;
 
 

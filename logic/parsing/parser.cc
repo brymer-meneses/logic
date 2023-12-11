@@ -142,15 +142,6 @@ constexpr auto Parser::match(std::initializer_list<TokenType> types) -> bool {
   return false;
 }
 
-constexpr auto Parser::check(TokenType type) const -> bool {
-  return peek().type == type;
-}
-
-constexpr auto Parser::checkNext(TokenType type) const -> bool {
-  if (isAtEnd()) return false;
-  return mTokens[mCurrent + 1].type == type;
-}
-
 constexpr auto Parser::advance() -> const Token& {
   if (isAtEnd()) {
     return mTokens.back();

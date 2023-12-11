@@ -6,6 +6,7 @@
 
 #include "logic/utils/macros.h"
 #include "logic/utils/overloaded.h"
+#include "logic/utils/color.h"
 
 #include <set>
 #include <ranges>
@@ -39,6 +40,8 @@ auto Evaluator::negation(Value v) const -> Value {
 }
 
 auto Evaluator::evaluate(const Sentence& sentence) -> std::expected<Value, EvaluatorError> {
+  std::println(stderr, "{}", Color::Yellow(Sentence::asString(sentence)));
+
   TRY(initializeVariables(sentence));
   recordEnvironment();
   return internalEvaluate(sentence);
@@ -71,7 +74,9 @@ auto Evaluator::internalEvaluate(const Sentence& sentence) const -> std::expecte
           // NOTE:
           //    we can already be sure that this is a valid assignment since that is checked 
           //    before-hand by 'recordEvaluation'
-          return internalEvaluate(*s.right);
+          auto result = TRY(internalEvaluate(*s.right));
+          recordEvaluation(*s.left, result);
+          return result;
         }
 
         const auto lhs = TRY(internalEvaluate(*s.left));
