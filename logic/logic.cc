@@ -16,8 +16,8 @@
 using namespace logic;
 
 
-auto Logic::run(std::string_view source, Environment& environment) -> void {
-  auto scanner = Scanner(source, "REPL");
+auto Logic::run(std::string_view source, Environment& environment, std::string_view filename) -> void {
+  auto scanner = Scanner(source, filename);
   auto tokens = scanner.scan();
 
   if (not tokens.has_value()) {
@@ -54,7 +54,7 @@ auto Logic::runREPL() -> void {
     
     if (not std::getline(std::cin, source)) { break; }
 
-    run(source, environment);
+    run(source, environment, "REPL");
   }
 }
 
@@ -69,13 +69,14 @@ auto Logic::runFile(std::string_view filename) -> void {
 
   if (file.is_open()) {
     std::string line;
-    while (std::getline(file, line)) {
+    while (file) {
+      std::getline(file, line);
       source << line << "\n";
     }
   }
 
   Environment environment;
-  run(source.str(), environment);
+  run(source.str(), environment, filename);
 }
 
 auto Logic::report(const ParserError& e, std::string_view source) -> void {
@@ -98,7 +99,7 @@ auto Logic::report(const ScannerError& e, std::string_view source) -> void {
       return std::format("Unexpected keyword `{}` did you mean `{}`?", e.keyword, e.suggestion);
     },
     [](const ScannerError::InvalidKeywordFormat &e) {
-      return std::format("The keyword `{}` is not capitalized correctly. It should be {}", e.keyword, stringToUpper(e.keyword));
+      return std::format("The keyword `{}` is not capitalized correctly. It should be `{}`.", e.keyword, stringToUpper(e.keyword));
     },
     [](const ScannerError::InvalidVariableName &e) {
       return std::format("Invalid variable name `{}`. Variables must have length 1", e.name);
@@ -146,7 +147,7 @@ auto Logic::reportInternal(std::string_view message, SourceLocation location, st
   };
 
   if (location.filename != "REPL")  {
-    std::println(stderr, "{}:{}:{}", location.filename, location.line, location.start);
+    std::println(stderr, "{} {}:{}:{}", Color::Red("->"), location.filename, location.line, location.start);
   }
 
   auto locationLength = std::to_string(location.line).length();

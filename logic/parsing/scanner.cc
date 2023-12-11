@@ -24,7 +24,7 @@ auto Scanner::scanToken() -> std::expected<void, ScannerError> {
     case '\t':
       break;
     case '\n':
-      mLastLine = mCurrent - 1;
+      mLineStart = mCurrent;
       mLine += 1;
       break;
     case '#':
@@ -138,5 +138,5 @@ constexpr auto Scanner::peek() const -> char {
 }
 
 constexpr auto Scanner::getCurrentLocation() const -> SourceLocation {
-  return SourceLocation(mStart - mLastLine, mCurrent - mLastLine, mLine, mFilename);
+  return SourceLocation(mStart - mLineStart, mCurrent - mLineStart, mLine, mFilename);
 }

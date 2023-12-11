@@ -58,7 +58,7 @@ class Scanner {
   size_t mStart = 0;
   size_t mCurrent = 0;
   size_t mLine = 1;
-  size_t mLastLine = 0;
+  size_t mLineStart = 0;
   std::vector<Token> mTokens;
 
   std::string_view mSource;
