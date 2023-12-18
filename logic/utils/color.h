@@ -1,15 +1,16 @@
 #pragma once
 
+#include <fmt/core.h>
+#include <iostream>
+
 #include <cctype>
-#include <format>
 #include <string>
-#include <print>
 
 namespace logic {
 
 template <typename T>
 concept Printable = requires(const T& msg) {
-  { std::println("{}", msg)};
+  { fmt::println("{}", msg)};
 };
 
 class Color {
@@ -52,20 +53,22 @@ public:
   DEFINE_COLOR(White);
   DEFINE_COLOR(Gray);
   DEFINE_COLOR(Cyan);
+
+
 };
 
 } // namespace logic
 
-template <> 
-struct std::formatter<logic::Color> {
-
-  template <typename ParseContext> 
-  constexpr auto parse(ParseContext &ctx) {
-    return ctx.begin();
+template <>
+class fmt::formatter<logic::Color> {
+public:
+  constexpr auto parse (format_parse_context& ctx) { 
+    return ctx.begin(); 
   }
 
   template <typename FormatContext>
   constexpr auto format(const logic::Color &c, FormatContext &ctx) const {
-    return std::format_to(ctx.out(), "\x1B[0;{}m{}\x1B[0m", int(c.type), c.contents);
+    return fmt::format_to(ctx.out(), "\x1B[0;{}m{}\x1B[0m", int(c.type), c.contents);
   }
 };
+

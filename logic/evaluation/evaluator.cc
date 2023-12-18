@@ -40,7 +40,7 @@ auto Evaluator::negation(Value v) const -> Value {
 }
 
 auto Evaluator::evaluate(const Sentence& sentence) -> std::expected<Value, EvaluatorError> {
-  std::println(stderr, "{}", Color::Yellow(Sentence::asString(sentence)));
+  fmt::println(stderr, "{}", Color::Yellow(Sentence::asString(sentence)));
 
   TRY(initializeVariables(sentence));
   recordEnvironment();

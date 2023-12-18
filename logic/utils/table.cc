@@ -2,9 +2,6 @@
 #include "logic/utils/macros.h"
 #include "logic/utils/color.h"
 
-#include <format>
-#include <print>
-
 using namespace logic;
 
 auto Table::print() const -> void {
@@ -16,13 +13,13 @@ auto Table::print() const -> void {
 
     for (auto i = 0; i < mColumns.size(); i++) {
       // print the contents
-      auto formatStr = std::format("{{: ^{}}}", mColumns[i].getMaxWidth() + 2*mPadding);
-      auto str = std::vformat(formatStr, std::make_format_args(mColumns[i][j]));
-      std::print("{}{}", line, str);
+      auto formatStr = fmt::format("{{: ^{}}}", mColumns[i].getMaxWidth() + 2*mPadding);
+      auto str = fmt::vformat(formatStr, fmt::make_format_args(mColumns[i][j]));
+      fmt::print("{}{}", line, str);
 
       // print the bar and the endline
       if (i == mColumns.size() - 1) {
-        std::println("{}", line);
+        fmt::println("{}", line);
       }
     }
   }
@@ -32,12 +29,12 @@ auto Table::print() const -> void {
 auto Table::printSeparationLine() const -> void {
   for (auto i = 0; i < mColumns.size(); i++) {
     auto length = mColumns[i].getMaxWidth() + 2*mPadding;
-    auto formatStr = std::format("+{{:-^{}}}", length);
-    auto str = std::vformat(formatStr, std::make_format_args(""));
-    std::print("{}", Color::Gray(str));
+    auto formatStr = fmt::format("+{{:-^{}}}", length);
+    auto str = fmt::vformat(formatStr, fmt::make_format_args(""));
+    fmt::print("{}", Color::Gray(str));
   }
 
   if (mColumns.size() != 0) {
-    std::println("{}", Color::Gray("+"));
+    fmt::println("{}", Color::Gray("+"));
   }
 }

@@ -1,4 +1,3 @@
-#include <print>
 #include <ranges>
 
 #include <gtest/gtest.h>

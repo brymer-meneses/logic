@@ -1,4 +1,4 @@
-#include <print>
+#include <fmt/core.h>
 
 #include "logic/logic.h"
 #include "logic/utils/color.h"
@@ -12,6 +12,6 @@ auto main(int argc, const char** argv) -> int {
   } else if (argc == 2) {
     Logic::runFile(argv[1]);
   } else {
-    std::println(stderr, "{}: usage {}", Color::Blue("Logic"), Color::Yellow("<source>"));
+    fmt::println(stderr, "{}: usage {}", Color::Blue("Logic"), Color::Yellow("<source>"));
   }
 }

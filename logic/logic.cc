@@ -50,7 +50,7 @@ auto Logic::runREPL() -> void {
   Environment environment;
   while (true) {
     std::string source;
-    std::print(">>> ");
+    fmt::print(">>> ");
     
     if (not std::getline(std::cin, source)) { break; }
 
@@ -63,7 +63,7 @@ auto Logic::runFile(std::string_view filename) -> void {
   std::stringstream source;
 
   if (file.fail()) {
-    std::println(stderr, "{}: File `{}` does not exist", Color::Blue("LOGIC"), Color::Yellow(filename));
+    fmt::println(stderr, "{}: File `{}` does not exist", Color::Blue("LOGIC"), Color::Yellow(filename));
     exit(1);
   }
 
@@ -83,11 +83,11 @@ auto Logic::report(const ParserError& e, std::string_view source) -> void {
   auto location = e.accept([](auto& error){return error.location;}) ;
   auto message = e.accept(overloaded{
       [](const ParserError::UnexpectedToken &e) {
-        return std::format("Unexpected token {}, expected {}", e.got.lexeme,
+        return fmt::format("Unexpected token {}, expected {}", e.got.lexeme,
                            tokenTypeToString(e.expected));
       },
       [](const ParserError::ExpectedSentence &e) {
-        return std::format("Expected sentence about here.");
+        return fmt::format("Expected sentence about here.");
       }});
   reportInternal(message, location, source);
 }
@@ -96,16 +96,16 @@ auto Logic::report(const ScannerError& e, std::string_view source) -> void {
   auto location = e.accept([](auto& error){return error.location;}) ;
   auto message = e.accept(overloaded {
     [](const ScannerError::UnexpectedKeyword &e) {
-      return std::format("Unexpected keyword `{}` did you mean `{}`?", e.keyword, e.suggestion);
+      return fmt::format("Unexpected keyword `{}` did you mean `{}`?", e.keyword, e.suggestion);
     },
     [](const ScannerError::InvalidKeywordFormat &e) {
-      return std::format("The keyword `{}` is not capitalized correctly. It should be `{}`.", e.keyword, stringToUpper(e.keyword));
+      return fmt::format("The keyword `{}` is not capitalized correctly. It should be `{}`.", e.keyword, stringToUpper(e.keyword));
     },
     [](const ScannerError::InvalidVariableName &e) {
-      return std::format("Invalid variable name `{}`. Variables must have length 1", e.name);
+      return fmt::format("Invalid variable name `{}`. Variables must have length 1", e.name);
     },
     [](const ScannerError::UnexpectedCharacter &e) {
-      return std::format("Unexpected character `{}`", e.character);
+      return fmt::format("Unexpected character `{}`", e.character);
     }
   });
 
@@ -116,7 +116,7 @@ auto Logic::report(const EvaluatorError& e, std::string_view source) -> void {
   auto location = e.accept([](auto& error){return error.location;}) ;
   auto message = e.accept(overloaded{
       [](const EvaluatorError::MaximumVariablesAchieved &e) -> std::string {
-        return std::format("Maximum variables reached, this program only supports up to {} variables.", Environment::MAX_VARIABLES);
+        return fmt::format("Maximum variables reached, this program only supports up to {} variables.", Environment::MAX_VARIABLES);
       },
       [](const EvaluatorError::InvalidAssignment &e) -> std::string {
         return "Invalid assignment. Ensure that the left-hand side is a "
@@ -139,15 +139,15 @@ auto Logic::reportInternal(std::string_view message, SourceLocation location, st
     return (currentLine == nthLine) ? line : "";
   };
   static constexpr auto leftPad = [](std::string_view string, size_t length) -> std::string {
-    return std::format("{}{}", std::string(length, ' '), string);
+    return fmt::format("{}{}", std::string(length, ' '), string);
   };
   static constexpr auto highlightArrows = [](size_t length) -> std::string {
-    auto formatStr = std::format("{{:^^{}}}", length);
-    return std::vformat(formatStr, std::make_format_args(""));
+    auto formatStr = fmt::format("{{:^^{}}}", length);
+    return fmt::vformat(formatStr, fmt::make_format_args(""));
   };
 
   if (location.filename != "REPL")  {
-    std::println(stderr, "{} {}:{}:{}", Color::Red("->"), location.filename, location.line, location.start);
+
   }
 
   auto locationLength = std::to_string(location.line).length();
@@ -156,8 +156,8 @@ auto Logic::reportInternal(std::string_view message, SourceLocation location, st
   auto line = Color::Blue("|");
   auto lineNumber = Color::Blue(location.line);
 
-  std::println(stderr, "{} {}", padding, line);
-  std::println(stderr, "{} {} {}", lineNumber, line, getNthLine(source, location.line));
-  std::println(stderr, "{} {} {}", padding, line, Color::Red(arrows));
-  std::println(stderr, "{} {}", Color::Yellow("ERROR:"), message);
+  fmt::println(stderr, "{} {}", padding, line);
+  fmt::println(stderr, "{} {} {}", lineNumber, line, getNthLine(source, location.line));
+  fmt::println(stderr, "{} {} {}", padding, line, Color::Red(arrows));
+  fmt::println(stderr, "{} {}", Color::Yellow("ERROR:"), message);
 }

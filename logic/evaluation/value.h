@@ -2,7 +2,6 @@
 
 #include <variant>
 #include <vector>
-#include <format>
 
 #include "logic/utils/macros.h"
 

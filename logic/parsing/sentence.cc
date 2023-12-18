@@ -3,34 +3,34 @@
 #include "logic/utils/overloaded.h"
 
 #include <string>
-#include <format>
+#include <fmt/core.h>
 
 using namespace logic;
 
 auto Sentence::asString(const Sentence& s) -> std::string {
   return s.accept(overloaded {
     [](const Sentence::Grouped& s) {
-      return std::format("({})", asString(*s.sentence));
+      return fmt::format("({})", asString(*s.sentence));
     },
     [](const Sentence::Value& s) {
-      return std::format("{}", tokenTypeToString(s.value.type));
+      return fmt::format("{}", tokenTypeToString(s.value.type));
     },
     [](const Sentence::Negated& s) {
-      return std::format("¬{}", asString(*s.sentence));
+      return fmt::format("¬{}", asString(*s.sentence));
     },
     [](const Sentence::Variable& s) {
-      return std::format("{}", s.identifier.lexeme);
+      return fmt::format("{}", s.identifier.lexeme);
     },
     [](const Sentence::Compound& s) {
       auto right = asString(*s.right);
       auto left = asString(*s.left);
       if (s.right->is<Sentence::Compound>()) {
-        right = std::format("({})", right);
+        right = fmt::format("({})", right);
       }
       if (s.left->is<Sentence::Compound>()) {
-        left = std::format("({})", left);
+        left = fmt::format("({})", left);
       }
-      return std::format("{} {} {}", left, tokenTypeToString(s.connective.type), right);
+      return fmt::format("{} {} {}", left, tokenTypeToString(s.connective.type), right);
     },
   });
 

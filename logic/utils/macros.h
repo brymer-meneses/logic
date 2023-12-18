@@ -1,14 +1,14 @@
 #pragma once
 
-#include <print>
 #include <source_location>
+#include <fmt/core.h>
 
 
 #define RAISE_INTERNAL_ERROR(...) \
 { \
   const auto location = std::source_location::current(); \
-  std::println(stderr, "[{}:{}]: {}", location.file_name(), location.line(), location.function_name()); \
-  std::println(stderr, "INTERNAL ERROR: " __VA_ARGS__); \
+  fmt::println(stderr, "[{}:{}]: {}", location.file_name(), location.line(), location.function_name()); \
+  fmt::println(stderr, "INTERNAL ERROR: " __VA_ARGS__); \
   exit(1); \
 }
 
@@ -25,9 +25,9 @@
   {                                                                            \
     if (not(expr)) [[unlikely]] {                                              \
       const auto location = std::source_location::current();                   \
-      std::println(stderr, "[{}:{}]: {}", location.file_name(),                \
+      fmt::println(stderr, "[{}:{}]: {}", location.file_name(),                \
                    location.line(), location.function_name());                 \
-      std::println(stderr, "ASSERTION ERROR: " __VA_ARGS__);                   \
+      fmt::println(stderr, "ASSERTION ERROR: " __VA_ARGS__);                   \
       exit(1);                                                                 \
     }                                                                          \
   }

@@ -4,7 +4,6 @@
 #include <vector>
 #include <expected>
 #include <variant>
-#include <format>
 
 #include "logic/parsing/token.h"
 

@@ -22,23 +22,32 @@ cpp_args = [
   '-Wno-gnu-statement-expression'
 ]
 
+
+gtest = subproject('gtest')
+gtest_dep = gtest.get_variable('gtest_dep')
+gmock_dep = gtest.get_variable('gmock_dep')
+fmt = subproject('fmt')
+fmt_dep = fmt.get_variable('fmt_dep')
+
 liblogic = static_library(
   'logic',
   sources: sources,
   cpp_args: cpp_args,
-  include_directories: ['logic']
+  include_directories: ['logic'],
+  dependencies: [
+    fmt_dep
+  ]
 )
 
 executable(
   'logic',
   sources: 'logic/main.cc',
   cpp_args: cpp_args,
-  link_with: liblogic
+  link_with: liblogic,
+  dependencies: [
+    fmt_dep
+  ]
 )
-
-gtest = subproject('gtest')
-gtest_dep = gtest.get_variable('gtest_dep')
-gmock_dep = gtest.get_variable('gmock_dep')
 
 test_sources = [
   'tests/testRunner.cc',
@@ -57,6 +66,7 @@ test_runner = executable(
   dependencies: [
     gtest_dep,
     gmock_dep,
+    fmt_dep,
   ],
   cpp_args: cpp_args,
   link_with: liblogic,
